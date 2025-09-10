@@ -32,10 +32,9 @@ def user_list(request):
 def user_register(request):
     return render(request,'user_form.html')
 
-
 #planes
 
 def plans_list(request):
-    return render(request,'plans_list.html',{"Plans":PLANES})
+    return render(request,'plans_list.html',{"plans":PLANES})
 def plans_register(request):
     return render(request,'plans_forms.html')

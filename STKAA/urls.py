@@ -9,5 +9,5 @@ urlpatterns=[
     path('user/new/',user_register,name='user_register'),
     #plans
     path('plans/',plans_list,name='plans_list'),
-    path('plans/new/',plans_register,name='plans_forms')
+    path('plans/new/',plans_register,name='plans_register')
 ]

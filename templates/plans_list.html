@@ -1,26 +1,25 @@
-{% extends "base.html" %}  {# si tu base global es templates/base.html #}
-{% block title %}Registrar plan{% endblock %}
+{% extends "base.html" %}
+{% block title %}Planes{% endblock %}
 {% block content %}
-  <h2>Registrar plan (solo UI, no guarda)</h2>
-  <form method="post" action="#">
-    {% csrf_token %}
-    <label>name_plan:
-      <select name="name_plan" required>
-        <option value="basico">basico</option>
-        <option value="avanzado">avanzado</option>
-        <option value="premium">premium</option>
-      </select>
-    </label><br><br>
-
-    <label>mounthly_creditos:
-      <input type="number" name="mounthly_creditos" min="0" step="1">
-    </label><br><br>
-
-    <label>is_unlimited:
-      <input type="checkbox" name="is_unlimited" value="1">
-    </label><br><br>
-
-    <button type="submit" disabled>Guardar (deshabilitado)</button>
-  </form>
-  <p style="color:#888">* Solo UI; no persiste datos.</p>
+<h2>Planes (Listado)</h2>
+<p><a href="{% url 'plans_register' %}">➕ Registrar plan</a></p>
+<table border="1" cellpadding="6">
+  <thead>
+    <tr>
+      <th>ID</th><th>name_plan</th><th>mounthly_creditos</th><th>is_unlimited</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in plans %}
+    <tr>
+      <td>{{ p.id }}</td>
+      <td>{{ p.name_plan }}</td>
+      <td>{{ p.mounthly_creditos }}</td>
+      <td>{% if p.is_unlimited %}1{% else %}0{% endif %}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Sin registros.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
