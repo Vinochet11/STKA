@@ -1,0 +1,32 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}STKAA{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'STKAA/css/estilos.css' %}">
+</head>
+<body>
+  <header><h1>
+
+    {% if request.user.is_authenticated %}
+  <span>Hola, {{ request.user.username }}</span>
+  <a href="{% url 'logout' %}">Salir</a>
+{% else %}
+  <a href="{% url 'login' %}">Entrar</a>
+{% endif %}
+
+    <nav>
+        <a href="{% url 'user_list' %}">Usuarios</a> |
+        <a href="{% url 'user_register' %}">Nuevo Usuario</a> |
+        <a href="{% url 'plans_list' %}">Planes</a> |
+        <a href="{% url 'plans_forms' %}">Nuevo Plan</a>
+    </nav>
+    
+
+    </h1></header>
+    <main>{% block content %}{% endblock %}</main>
+    <link rel="stylesheet" href="{% static 'STKAA/css/estilos.css' %}">
+    <script src="{% static 'STKAA/js/scripts.js' %}"></script>
+</body>
+</html>

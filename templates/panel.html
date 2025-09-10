@@ -1,0 +1,7 @@
+{% extends "STKAA/base.html" %}
+{%block title%}Panel{% endblock %}
+{% block content %}
+    <h2>Panel privado</h2>
+    <p>hola, {{ request.user.username }}</p>
+    <p><a href="{% url 'logout' %}">cerrar sesion</a></p>
+{% endblock %}
