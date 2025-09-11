@@ -1,0 +1,28 @@
+{% extends "base.html"%}
+{% block title %}Nueva Clase(sesion){% endblock %}
+{%block content%}
+<h2>Nueva Clase</h2>
+<form action="post" action="#">
+    {% csrf_token %}
+
+    <label for="activity_id"><strong>activity_id</strong></label><br>
+    <input type="number" id="activity_id"  name="activity_id" min="1" placeholder="ID de la actividad" >
+    <br><br>
+
+    <label for="start_class"><strong>start_class</strong></label><br>
+    <input type="datatime-local" id="end_clase" name="end_clase">
+    <br><br>
+
+    <label for="end_clase"><strong>end_clase</strong></label><br>
+    <input type="time" id="end_clase" name="end_clase">
+    <br><br>
+
+    <label for="status"><strong>status</strong></label><br>
+    <select name="status" id="status">
+        <option value="Finalizada">Finalizada</option>
+        <option value="Cancelada">Cancelada</option>
+    </select>
+    <br><br>
+    <button type="submit" disable>Guardar</button>
+</form>
+{% endblock %}

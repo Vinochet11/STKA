@@ -9,12 +9,24 @@
   <tbody>
     {% for u in users %}
     <tr>
-      <td>{{ u.id }}</td><td>{{ u.name }}</td><td>{{ u.email }}</td>
-      <td>{{ u.rol }}</td><td>{{ u.status }}</td><td>{{ u.plan_mensual }}</td>
+        <td>{{ u.id }}</td>
+        <td>{{ u.name }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.rol }}</td>
+        <td>{{ u.status }}</td>
+        <td>{{ u.plan_nombre }}</td>
     </tr>
     {% empty %}
     <tr><td colspan="6">Sin registros.</td></tr>
     {% endfor %}
+    <td>
+      <td>{{ u.id }}</td>
+      <td>{{ u.name }}</td>
+      <td>{{ u.email }}</td>
+      <td>{{ u.rol }}</td>
+      <td>{{ u.status }}</td>
+      <td>{{ u.plan_nombre }}</td></td>
+
   </tbody>
 </table>
 {% endblock %}

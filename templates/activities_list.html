@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title%}Actividades{% endblock %}
+{% block content %}
+<h2>Actividades (Listado)</h2>
+{% if request.user.is_staff %}
+    <p><a href="{% url 'activities_register' %}">+ nueva actividad</a></p>
+{% endif %}
+<table border="1" cellpadding="6">
+    <thead>
+        <tr><th>ID</th>name</tr>
+    </thead>
+    <tbody>
+        {%for a in activities %}
+        <tr>
+            <td>{{ a.id }}</td>
+            <td>{{ a.name }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2">Sin registros.</td></tr>
+        {% endfor %}
+    </tbody>
+</table> 
+{% endblock %}

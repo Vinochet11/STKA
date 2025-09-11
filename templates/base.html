@@ -7,26 +7,43 @@
   <link rel="stylesheet" href="{% static 'STKAA/css/estilos.css' %}">
 </head>
 <body>
-  <header><h1>
-
-    {% if request.user.is_authenticated %}
-  <span>Hola, {{ request.user.username }}</span>
-  <a href="{% url 'logout' %}">Salir</a>
-{% else %}
-  <a href="{% url 'login' %}">Entrar</a>
-{% endif %}
+  <header class="topbar">
+    <div class="auth">
+      {% if request.user.is_authenticated %}
+        <span>Hola, {{ request.user.username }}</span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+         {% csrf_token %}
+        <button type="submit" class="link-button">Salir</button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}">Entrar</a>
+      {% endif %}
+    </div>
 
     <nav>
-        <a href="{% url 'user_list' %}">Usuarios</a> |
-        <a href="{% url 'user_register' %}">Nuevo Usuario</a> |
-        <a href="{% url 'plans_list' %}">Planes</a> |
-        <a href="{% url 'plans_register' %}">Nuevo Plan</a>
-    </nav>
-    
+      
+      <a href="{% url 'plans_list' %}">Planes</a>
+      <a href="{% url 'activities_list' %}">Actividades</a>
+      <a href="{% url 'sessions_list' %}">Clases</a>
 
-    </h1></header>
-    <main>{% block content %}{% endblock %}</main>
-    <link rel="stylesheet" href="{% static 'STKAA/css/estilos.css' %}">
-    <script src="{% static 'STKAA/js/scripts.js' %}"></script>
+      
+      {% if request.user.is_authenticated and not request.user.is_staff %}
+        <a href="{% url 'bookings_list' %}">Mis agendamientos</a>
+      {% endif %}
+
+    
+      {% if request.user.is_staff %}
+        <a href="{% url 'user_list' %}">Usuarios</a>
+        <a href="{% url 'user_register' %}">Nuevo Usuario</a>
+        <a href="{% url 'plans_register' %}">Nuevo Plan</a>
+        <a href="{% url 'activities_register' %}">Nueva Actividad</a>
+        <a href="{% url 'sessions_register' %}">Nueva Clase</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <script src="{% static 'STKAA/js/scripts.js' %}"></script>
 </body>
 </html>

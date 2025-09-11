@@ -2,11 +2,11 @@
 {% block title %}Planes{% endblock %}
 {% block content %}
 <h2>Planes (Listado)</h2>
-<p><a href="{% url 'plans_register' %}">➕ Registrar plan</a></p>
+<p><a href="{% url 'plans_register' %}"> Registrar plan</a></p>
 <table border="1" cellpadding="6">
   <thead>
     <tr>
-      <th>ID</th><th>name_plan</th><th>mounthly_creditos</th><th>is_unlimited</th>
+      <th>ID</th><th>name_plan</th><th>mounthly_class</th><th>is_unlimited</th>
     </tr>
   </thead>
   <tbody>
@@ -14,7 +14,7 @@
     <tr>
       <td>{{ p.id }}</td>
       <td>{{ p.name_plan }}</td>
-      <td>{{ p.mounthly_creditos }}</td>
+      <td>{{ p.clases_mensuales }}</td>
       <td>{% if p.is_unlimited %}1{% else %}0{% endif %}</td>
     </tr>
     {% empty %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Clases (sesiones){% endblock %}
+{% block content %}
+<h2>Clases (sesiones)</h2>
+{% if request.user.is_staff %}
+    <p><a href="{% url 'sessions_register' %}">+ Nueva clase</a></p>
+{% endif %}
+
+<table border="1" cellpadding="6">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Actividad</th>
+      <th>start_class</th>
+      <th>end_class</th>
+      <th>status</th>
+      <th>Acciones </th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in sessions %}
+    <tr>
+      <td>{{ s.id }}</td>
+      <td>{{ s.activity_name }}</td>
+      <td>{{ s.start_class }}</td>
+      <td>{{ s.end_class }}</td>
+      <td>{{ s.status }}</td>
+      <td>
+        <button type="button" onclick="alert('Agendado (simulado)');">Agendar</button>
+        <button type="button" onclick="alert('Cancelado (simulado)');">Cancelar</button>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">Sin registros.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
