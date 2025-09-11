@@ -1,17 +1,26 @@
 {% extends "base.html" %}
-{% block title %}Nueva Actividad{% endblock %}
+{% block title %}{% if mode == "edit" %}Editar Actividad{% else %}Nueva Actividad{% endif %}{% endblock %}
 
 {% block content %}
-  <h2>Nueva Actividad</h2>
+<div class="container py-4">
+  <h2 class="mb-3">{% if mode == "edit" %}Editar Actividad{% else %}Nueva Actividad{% endif %}</h2>
 
-  <form method="post">
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="">
     {% csrf_token %}
-    <label for="name">Nombre</label>
-    <input id="name" name="name" type="text" required>
 
-    <div style="margin-top: 12px;">
-      <button type="submit">Guardar</button>
-      <a href="{% url 'activities_list' %}">Volver</a>
+    <div class="mb-3">
+      <label for="name" class="form-label"><strong>Nombre</strong></label>
+      <input id="name" name="name" type="text" class="form-control" value="{{ activity.name|default:'' }}" required>
     </div>
+
+    <button type="submit" class="btn btn-primary">
+      {% if mode == "edit" %}Guardar cambios{% else %}Guardar{% endif %}
+    </button>
+    <a href="{% url 'activities_list' %}" class="btn btn-outline-secondary ms-2">Volver</a>
   </form>
+</div>
 {% endblock %}

@@ -18,6 +18,7 @@
           <th>Nombre</th>
           <th>Clases mensuales</th>
           <th>Ilimitado</th>
+          {% if request.user.is_staff %}<th class="text-end">Acciones</th>{% endif %}
         </tr>
       </thead>
       <tbody>
@@ -25,13 +26,7 @@
           <tr>
             <td>{{ p.id }}</td>
             <td>{{ p.name_plan|title }}</td>
-            <td>
-              {% if p.clases_mensuales is not None %}
-                {{ p.clases_mensuales }}
-              {% else %}
-                —
-              {% endif %}
-            </td>
+            <td>{% if p.clases_mensuales is not None %}{{ p.clases_mensuales }}{% else %}—{% endif %}</td>
             <td>
               {% if p.is_unlimited %}
                 <span class="badge text-bg-success">Sí</span>
@@ -39,10 +34,19 @@
                 <span class="badge text-bg-secondary">No</span>
               {% endif %}
             </td>
+            {% if request.user.is_staff %}
+              <td class="text-end">
+                <a href="{% url 'plans_edit' p.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                <form method="post" action="{% url 'plans_delete' p.id %}" style="display:inline">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar plan?')">Eliminar</button>
+                </form>
+              </td>
+            {% endif %}
           </tr>
         {% empty %}
           <tr>
-            <td colspan="4" class="text-center text-muted">Sin registros.</td>
+            <td colspan="5" class="text-center text-muted">Sin registros.</td>
           </tr>
         {% endfor %}
       </tbody>

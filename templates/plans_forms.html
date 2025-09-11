@@ -1,41 +1,51 @@
 {% extends "base.html" %}
-{% block title %}Registrar plan{% endblock %}
+{% block title %}{% if mode == "edit" %}Editar plan{% else %}Registrar plan{% endif %}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
-  <h2 class="mb-3">Registrar plan</h2>
+  <h2 class="mb-3">{% if mode == "edit" %}Editar plan{% else %}Registrar plan{% endif %}</h2>
+
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
 
   <form method="post" action="" class="row g-3">
     {% csrf_token %}
 
     <div class="col-12 col-md-6">
       <label for="name_plan" class="form-label"><strong>Nombre del plan</strong></label>
-      <input type="text" id="name_plan" name="name_plan" class="form-control" required>
+      <input type="text" id="name_plan" name="name_plan" class="form-control"
+             value="{{ plan.name_plan|default:'' }}" required>
     </div>
 
     <div class="col-12 col-md-4">
       <label for="clases_mensuales" class="form-label"><strong>Clases mensuales</strong></label>
       <input type="number" id="clases_mensuales" name="clases_mensuales"
-             class="form-control" min="0" step="1" placeholder="Ej: 8">
+             class="form-control" min="0" step="1"
+             value="{% if plan.clases_mensuales is not None %}{{ plan.clases_mensuales }}{% endif %}"
+             placeholder="Ej: 8">
       <div class="form-text">Si eliges “Ilimitado”, puedes dejar este campo en blanco.</div>
     </div>
 
-   -
     <div class="col-12 col-md-2 d-flex align-items-end">
       <div>
         <label class="form-label d-block"><strong>Tipo</strong></label>
         <div class="btn-group" role="group" aria-label="Tipo de plan">
-          <input type="radio" class="btn-check" name="is_unlimited" id="limited" value="0" autocomplete="off" checked>
+          <input type="radio" class="btn-check" name="is_unlimited" id="limited" value="0" autocomplete="off"
+                 {% if not plan.is_unlimited %}checked{% endif %}>
           <label class="btn btn-outline-secondary" for="limited">Con cupo</label>
 
-          <input type="radio" class="btn-check" name="is_unlimited" id="unlimited" value="1" autocomplete="off">
+          <input type="radio" class="btn-check" name="is_unlimited" id="unlimited" value="1" autocomplete="off"
+                 {% if plan.is_unlimited %}checked{% endif %}>
           <label class="btn btn-outline-success" for="unlimited">Ilimitado</label>
         </div>
       </div>
     </div>
 
     <div class="col-12">
-      <button type="submit" class="btn btn-success">Crear plan</button>
+      <button type="submit" class="btn btn-primary">
+        {% if mode == "edit" %}Guardar cambios{% else %}Crear plan{% endif %}
+      </button>
       <a href="{% url 'plans_list' %}" class="btn btn-outline-secondary ms-2">Cancelar</a>
     </div>
   </form>
