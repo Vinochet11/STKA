@@ -1,13 +1,30 @@
-{% extends "base.html"%} 
-{% block title %} iniciar sesion {% endblock %}
+{% extends "base.html" %}
+{% block title %}Iniciar sesión{% endblock %}
+
 {% block content %}
-    <h2>Iniciar sesion</h2>
-    {% if form.errors%}
-        <p>Usuario o contraseña invalido</p>
-    {%endif %}
-    <form method="post" action="">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Entrar</button>
-    </form>
+<div class="container py-5" style="max-width: 480px;">
+  <h2 class="mb-4">Iniciar sesión</h2>
+
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      Usuario o contraseña inválidos.
+    </div>
+  {% endif %}
+
+  <form method="post" action="" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label for="id_username" class="form-label">Usuario</label>
+      <input type="text" name="username" id="id_username" class="form-control" required autofocus>
+    </div>
+
+    <div class="mb-3">
+      <label for="id_password" class="form-label">Contraseña</label>
+      <input type="password" name="password" id="id_password" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Entrar</button>
+  </form>
+</div>
 {% endblock %}

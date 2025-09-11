@@ -1,27 +1,47 @@
 {% extends "base.html" %}
 {% block title %}Mis Agendamientos{% endblock %}
+
 {% block content %}
-<h2>Mis Agendamientos </h2>
-<table border="1" cellpadding="6">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>user_id</th>
-      <th>session_id</th>
-      <th>status</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for b in bookings %}
-    <tr>
-      <td>{{ b.id }}</td>
-      <td>{{ b.user_id }}</td>
-      <td>{{ b.session_id }}</td>
-      <td>{{ b.status }}</td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="4">Sin agendamientos.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">Mis Agendamientos</h2>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Usuario</th>
+          <th>Clase</th>
+          <th>Inicio</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in bookings %}
+          <tr>
+            <td>{{ b.id }}</td>
+            <td>{{ b.user_name }}</td>
+            <td>{{ b.activity_name }}</td>
+            <td>{{ b.start_class }}</td>
+            <td>
+              {% if b.status|lower == "asistire" %}
+                <span class="badge text-bg-primary">{{ b.status }}</span>
+              {% elif b.status|lower == "cancelada" %}
+                <span class="badge text-bg-danger">{{ b.status }}</span>
+              {% else %}
+                <span class="badge text-bg-secondary">{{ b.status }}</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted">Sin agendamientos.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

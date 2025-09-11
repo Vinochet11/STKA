@@ -1,41 +1,54 @@
 {% extends "base.html" %}
 {% block title %}Registrar usuario{% endblock %}
 {% block content %}
-<h2>Registrar usuario</h2>
+  <h2 class="h4 mb-3">Registrar usuario</h2>
 
-<form method="post" action="#">
-  {% csrf_token %}
-  <label>Nombre:
-    <input type="text" name="name" maxlength="45">
-  </label><br><br>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="post" action="#" class="row g-3">
+        {% csrf_token %}
 
-  <label>Email:
-    <input type="email" name="email" maxlength="45">
-  </label><br><br>
+        <div class="col-md-6">
+          <label class="form-label">Nombre</label>
+          <input type="text" name="name" maxlength="45" class="form-control" required>
+        </div>
 
-  <label>Contraseña:
-    <input type="password" name="password" maxlength="45">
-  </label><br><br>
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" maxlength="45" class="form-control" required>
+        </div>
 
-  <label>Rol:
-    <select name="rol">
-      <option value="user">user</option>
-      <option value="admin">admin</option>
-    </select>
-  </label><br><br>
+        <div class="col-md-6">
+          <label class="form-label">Contraseña</label>
+          <input type="password" name="password" maxlength="45" class="form-control" required>
+        </div>
 
-  <label>Status:
-    <select name="status">
-      <option value="Activo">Activo</option>
-      <option value="Inactivo">Inactivo</option>
-    </select>
-  </label><br><br>
+        <div class="col-md-3">
+          <label class="form-label">Rol</label>
+          <select name="rol" class="form-select">
+            <option value="user">user</option>
+            <option value="admin">admin</option>
+          </select>
+        </div>
 
-  <label>Plan mensual (id):
-    <input type="number" name="plan_mensual" min="1" step="1">
-  </label><br><br>
+        <div class="col-md-3">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
 
-  <button type="submit" disabled>Guardar (deshabilitado)</button>
-</form>
+        <div class="col-md-4">
+          <label class="form-label">Plan mensual (id)</label>
+          <input type="number" name="plan_mensual" min="1" step="1" class="form-control">
+        </div>
 
+        <div class="col-12 d-flex gap-2">
+          <button type="submit" class="btn btn-primary" disabled>Guardar </button>
+          <a href="{% url 'user_list' %}" class="btn btn-outline-secondary">Volver</a>
+        </div>
+      </form>
+    </div>
+  </div>
 {% endblock %}

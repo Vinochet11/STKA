@@ -1,28 +1,48 @@
 {% extends "base.html"%}
-{% block title %}Nueva Clase(sesion){% endblock %}
-{%block content%}
-<h2>Nueva Clase</h2>
-<form action="post" action="#">
-    {% csrf_token %}
+{% block title %}Nueva Clase (sesión){% endblock %}
 
-    <label for="activity_id"><strong>activity_id</strong></label><br>
-    <input type="number" id="activity_id"  name="activity_id" min="1" placeholder="ID de la actividad" >
-    <br><br>
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-10 col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h4 mb-4">Nueva clase</h2>
 
-    <label for="start_class"><strong>start_class</strong></label><br>
-    <input type="datatime-local" id="end_clase" name="end_clase">
-    <br><br>
+        <form  action="" autocomplete="off">
+          {% csrf_token %}
 
-    <label for="end_clase"><strong>end_clase</strong></label><br>
-    <input type="time" id="end_clase" name="end_clase">
-    <br><br>
+          <div class="mb-3">
+            <label for="activity_id" class="form-label"><strong>ID de actividad</strong></label>
+            <input type="number" class="form-control" id="activity_id" name="activity_id" min="1" placeholder="Ej: 1" required>
+            <div class="form-text">Ingresa el ID de una actividad existente.</div>
+          </div>
 
-    <label for="status"><strong>status</strong></label><br>
-    <select name="status" id="status">
-        <option value="Finalizada">Finalizada</option>
-        <option value="Cancelada">Cancelada</option>
-    </select>
-    <br><br>
-    <button type="submit" disable>Guardar</button>
-</form>
+          <div class="mb-3">
+            <label for="start_class" class="form-label"><strong>Inicio (start_class)</strong></label>
+            <input type="datetime-local" class="form-control" id="start_class" name="start_class" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="end_class" class="form-label"><strong>Término (end_class)</strong></label>
+            <input type="datetime-local" class="form-control" id="end_class" name="end_class" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="status" class="form-label"><strong>Estado</strong></label>
+            <select name="status" id="status" class="form-select">
+              <option value="terminada">terminada</option>
+              <option value="cancelada">cancelada</option>
+            </select>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" disabled>Guardar</button>
+            <a href="{% url 'sessions_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

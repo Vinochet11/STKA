@@ -1,9 +1,9 @@
 from django.urls import path
-from .views import (index,user_list, user_register,plans_list, plans_register,activities_list, activities_register,sessions_list, sessions_register,bookings_list,panel)
+from .views import (index,user_list, user_register,plans_list, plans_register,activities_list, activities_register,sessions_list, sessions_register,bookings_list,)
 
 urlpatterns=[
     path('',index, name='index'),
-    path('panel/',panel,name='panel'),
+    
     #ususarios
     path('user/',user_list,name='user_list'),
     path('user/new/',user_register,name='user_register'),

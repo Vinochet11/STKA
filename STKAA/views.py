@@ -116,5 +116,27 @@ def bookings_list(request):
 
 
 @login_required
-def panel(request):
-    return render(request,'STKAA/panel.html')
+def bookings_list(request):
+    bookings_enriched = []
+    for b in BOOKING:
+        user_name = USER_NAME_MAP.get(b.get("user_id"), "—")
+
+        session = SESSION_MAP.get(b.get("session_id")) if b.get("session_id") else None
+        activity_name = ACTIVIDAD_MAP.get(session["activity_id"]) if session else "—"
+        start_class   = session["start_class"] if session else "—"
+
+        bookings_enriched.append({
+            **b,
+            "user_name": user_name,
+            "activity_name": activity_name,
+            "start_class": start_class,
+        })
+
+    return render(request, 'bookings_list.html', {"bookings": bookings_enriched})
+
+
+
+
+USER_NAME_MAP = {u["id"]: u["name"] for u in USUARIOS}
+SESSION_MAP   = {s["id"]: s for s in SESSIONS} 
+
