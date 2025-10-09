@@ -10,11 +10,11 @@ USUARIOS = [
     {"id": 2, "name": "Javier", "Plan_mensual": 2, "email": "test@mail.com", "rol": "user",  "status": "Inactivo"},
 ]
 
-PLANES = [
+"""PLANES = [
     {"id": 1, "name_plan": "basico",   "clases_mensuales": 15,  "is_unlimited": False},
     {"id": 2, "name_plan": "avanzado", "clases_mensuales": 30,  "is_unlimited": False},
     {"id": 3, "name_plan": "premium",  "clases_mensuales": None,"is_unlimited": True},
-]
+]"""
 
 SESSIONS = [
     {"id": 1, "activity_id": 1, "start_class": "10/09/2025 21:00", "end_class": "10/09/2025 22:00", "status": "terminada"},
@@ -59,7 +59,7 @@ def user_list(request):
 @staff_member_required
 def user_register(request):
     return render(request, 'user_form.html')
-
+"""
 @login_required
 def plans_list(request):
     return render(request, 'plans_list.html', {"plans": PLANES})
@@ -133,8 +133,7 @@ def plans_delete(request, plan_id: int):
         raise Http404()
     remove_by_id(PLANES, plan_id)
     return redirect('plans_list')
-
-
+"""
 @login_required
 def activities_list(request):
     return render(request, 'activities_list.html', {"activities": ACTIVIDADES})
@@ -237,11 +236,11 @@ def session_map():
 
 
 # ------------------ HELPERS CRUD ------------------
-
+"""
 NEXT_IDS = {
     "plan": max([p["id"] for p in PLANES] or [0]) + 1,
     "act":  max([a["id"] for a in ACTIVIDADES] or [0]) + 1,
-}
+}"""
 
 def next_id(kind: str) -> int:
     nid = NEXT_IDS[kind]

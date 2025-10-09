@@ -2,10 +2,11 @@ from django.urls import path
 from .views import (
     index,
     user_list, user_register,
-    plans_list, plans_register, plans_edit, plans_delete,
+    #plans_list, plans_register, plans_edit, plans_delete,
     activities_list, activities_register, activities_edit, activities_delete,
     sessions_list, sessions_register, bookings_list, 
 )
+from STKAA.Planes.Planesviews import cr_plan,planes_list,plans_br,plans_editar
 
 urlpatterns = [
     path('', index, name='index'),
@@ -16,10 +17,10 @@ urlpatterns = [
     path('user/new/', user_register, name='user_register'),
 
 
-    path('plans/', plans_list, name='plans_list'),
-    path('plans/new/', plans_register, name='plans_register'),
-    path('plans/<int:plan_id>/edit/', plans_edit, name='plans_edit'),
-    path('plans/<int:plan_id>/delete/', plans_delete, name='plans_delete'),
+    path('plans/', planes_list, name='planes_list'),
+    path('plans/new/', cr_plan, name='cr_plan'),
+    path('plans/<int:plan_id>/edit/', plans_editar, name='plans_edit'),
+    path('plans/<int:plan_id>/delete/', plans_br, name='plans_br'),
 
     path('activities/', activities_list, name='activities_list'),
     path('activities/new/', activities_register, name='activities_register'),

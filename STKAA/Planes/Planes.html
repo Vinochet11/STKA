@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Nuevo plan{% endblock %}
+{% block content %}
+<h2>Nuevo plan</h2>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Guardar</button>
+  <a href="{% url 'plans_list' %}" class="btn btn-outline-secondary ms-2">Volver</a>
+</form>
+{% endblock %}
