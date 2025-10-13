@@ -17,7 +17,7 @@ urlpatterns = [
     path('user/new/', user_register, name='user_register'),
 
 
-    path('plans/', planes_list, name='planes_list'),
+    path('plans/', planes_list, name='plans_list'),
     path('plans/new/', cr_plan, name='cr_plan'),
     path('plans/<int:plan_id>/edit/', plans_editar, name='plans_edit'),
     path('plans/<int:plan_id>/delete/', plans_br, name='plans_br'),

@@ -1,4 +1,6 @@
 {% load static %}
+<link rel="stylesheet" href="{% static 'STKAA/css/estilos.css' %}">
+<script src="{% static 'STKAA/js/index.js' %}"></script>
 <!doctype html>
 <html lang="es">
 <head>
@@ -23,7 +25,7 @@
 
       <div id="mainNav" class="collapse navbar-collapse">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="{% url 'planes_list' %}">Planes</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'plans_list' %}">Planes</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'activities_list' %}">Actividades</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'sessions_list' %}">Clases</a></li>
 

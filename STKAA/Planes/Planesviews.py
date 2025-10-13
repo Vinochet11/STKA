@@ -14,14 +14,14 @@ def cr_plan(request):
             form.save()
             return redirect("plans_list")
         
-        return render(request, "plans_forms.html", {"form": form})
+        return render(request, "plans_forms.html", {"form": form,"mode":"create"})
     else:
         form = anadirPlan()
     return render(request, "plans_forms.html", {"form": form})
 
-@login_required
+#@login_required
 def planes_list(request):
-    planes = Plan.objects.all().order_by("id")   # ← ahora lee desde la BD
+    planes = Plan.objects.all().order_by("id")  
     return render(request, "plans_list.html", {"plans": planes})
 
 
@@ -35,7 +35,7 @@ def plans_editar(request, plan_id: int):
             return redirect('plans_list')
     else:
         form = anadirPlan(instance=plan)
-    return render(request, 'plans_forms.html', {"form": form})
+    return render(request, 'plans_forms.html', {"form": form, "mode":"edit"})
 
 @staff_member_required
 def plans_br(request, plan_id: int):

@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 class  Plan(models.Model):
     class Plan_seleccion(models.TextChoices):
         Basico='basico','BASICO'
-        AVANZADO='avandazo','Avanzado'
+        AVANZADO='avanzado','Avanzado'
         Premium='premium','PREMIUM'
 
     nombre_plan=models.CharField(max_length=20,choices=Plan_seleccion.choices)

@@ -25,10 +25,10 @@
         {% for p in plans %}
           <tr>
             <td>{{ p.id }}</td>
-            <td>{{ p.name_plan|title }}</td>
-            <td>{% if p.clases_mensuales is not None %}{{ p.clases_mensuales }}{% else %}—{% endif %}</td>
+            <td>{{ p.nombre_plan|title }}</td>
+            <td>{% if p.clases_Mensuales is not None %}{{ p.clases_Mensuales }}{% else %}—{% endif %}</td>
             <td>
-              {% if p.is_unlimited %}
+              {% if p.ilimitado %}
                 <span class="badge text-bg-success">Sí</span>
               {% else %}
                 <span class="badge text-bg-secondary">No</span>
@@ -37,7 +37,7 @@
             {% if request.user.is_staff %}
               <td class="text-end">
                 <a href="{% url 'plans_edit' p.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
-                <form method="post" action="{% url 'plans_delete' p.id %}" style="display:inline">
+                <form method="post" action="{% url 'plans_br' p.id %}" style="display:inline">
                   {% csrf_token %}
                   <button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar plan?')">Eliminar</button>
                 </form>
