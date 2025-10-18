@@ -6,7 +6,7 @@ from .views import (
     activities_list, activities_register, activities_edit, activities_delete,
     sessions_list, sessions_register, bookings_list, 
 )
-from STKAA.Planes.Planesviews import cr_plan,planes_list,plans_br,plans_editar
+from STKAA.views import cr_plan,planes_list,plans_br,plans_editar
 
 urlpatterns = [
     path('', index, name='index'),

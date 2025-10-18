@@ -1,20 +1,18 @@
-from django.shortcuts import render, redirect
+# STKAA/views.py
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
-# ------------------ DATOS EN MEMORIA ------------------
+# --- MODELOS / FORMS (planos, sin subcarpetas) ---
+from STKAA.models import Plan
+from STKAA.forms import anadirPlan
 
+# ------------------ DATOS EN MEMORIA (DEMO) ------------------
 USUARIOS = [
     {"id": 1, "name": "Jose",   "Plan_mensual": 1, "email": "test@test.cl",  "rol": "Admin", "status": "Activo"},
     {"id": 2, "name": "Javier", "Plan_mensual": 2, "email": "test@mail.com", "rol": "user",  "status": "Inactivo"},
 ]
-
-"""PLANES = [
-    {"id": 1, "name_plan": "basico",   "clases_mensuales": 15,  "is_unlimited": False},
-    {"id": 2, "name_plan": "avanzado", "clases_mensuales": 30,  "is_unlimited": False},
-    {"id": 3, "name_plan": "premium",  "clases_mensuales": None,"is_unlimited": True},
-]"""
 
 SESSIONS = [
     {"id": 1, "activity_id": 1, "start_class": "10/09/2025 21:00", "end_class": "10/09/2025 22:00", "status": "terminada"},
@@ -33,107 +31,73 @@ ACTIVIDADES = [
     {"id": 3, "name": "gimnasia funcional"},
 ]
 
+# ------------------ HELPERS ------------------
+def get_next_id(items) -> int:
+    return (max([it["id"] for it in items], default=0) + 1)
 
+def actividad_map():
+    return {a["id"]: a["name"] for a in ACTIVIDADES}
 
-# aqui comienza la configuracion de las views
+def user_name_map():
+    return {u["id"]: u["name"] for u in USUARIOS}
 
+def session_map():
+    return {s["id"]: s for s in SESSIONS}
+
+# ------------------ VISTAS BASE ------------------
 def index(request):
     return render(request, 'index.html')
 
-#
 @staff_member_required
 def user_list(request):
-    plan_by_id = {p["id"]: p for p in PLANES}  
-    users_enriched = []
-    for u in USUARIOS:
-        pid = u.get("Plan_mensual")
-        plan = plan_by_id.get(pid)
-        users_enriched.append({
-            **u,
-            "plan_nombre":   plan["name_plan"] if plan else "—",
-            "plan_clases":   (plan["clases_mensuales"] if plan and plan["clases_mensuales"] is not None else "—"),
-            "plan_ilimitado": plan["is_unlimited"] if plan else False,
-        })
-    return render(request, 'user_list.html', {"users": users_enriched})
+    # Nota: ya no se enriquece con PLANES (lista en memoria) para evitar inconsistencias.
+    return render(request, 'user_list.html', {"users": USUARIOS})
 
 @staff_member_required
 def user_register(request):
     return render(request, 'user_form.html')
-"""
-@login_required
-def plans_list(request):
-    return render(request, 'plans_list.html', {"plans": PLANES})
 
+# ------------------ PLANES (DB) ------------------
 @staff_member_required
-def plans_register(request):
+def cr_plan(request):
     if request.method == "POST":
-        name = (request.POST.get("name_plan") or "").strip()
-        ilim = (request.POST.get("is_unlimited") == "1")  
-        raw  = request.POST.get("clases_mensuales")
-        clases = None
-        if not ilim and raw:
-            try:
-                clases = int(raw)
-            except ValueError:
-                clases = None
+        form = anadirPlan(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("plans_list")
+        # Si no es válido, re-render con errores
+        return render(request, "plans_forms.html", {"form": form, "mode": "create"})
+    else:
+        form = anadirPlan()
+    return render(request, "plans_forms.html", {"form": form, "mode": "create"})
 
-        if not name:
-            return render(request, 'plans_forms.html', {
-                "error": "El nombre es obligatorio.",
-                "plan": {"name_plan": name, "clases_mensuales": clases, "is_unlimited": ilim},
-                "mode": "create",
-            })
-
-        PLANES.append({
-            "id": next_id("plan"),
-            "name_plan": name,
-            "clases_mensuales": clases,
-            "is_unlimited": ilim,
-        })
-        return redirect('plans_list')
-
-    return render(request, 'plans_forms.html', {"mode": "create"})
+# Quita @login_required si quieres que cualquiera lo vea
+def planes_list(request):
+    planes = Plan.objects.all().order_by("id")
+    return render(request, "plans_list.html", {"plans": planes})
 
 @staff_member_required
-def plans_edit(request, plan_id: int):
-    plan = find_by_id(PLANES, plan_id)
-    if not plan:
-        raise Http404("Plan no existe")
-
+def plans_editar(request, plan_id: int):
+    plan = get_object_or_404(Plan, pk=plan_id)
     if request.method == "POST":
-        name = (request.POST.get("name_plan") or "").strip()
-        ilim = (request.POST.get("is_unlimited") == "1")
-        raw  = request.POST.get("clases_mensuales")
-        clases = None
-        if not ilim and raw:
-            try:
-                clases = int(raw)
-            except ValueError:
-                clases = None
-
-        if not name:
-            return render(request, 'plans_forms.html', {
-                "error": "El nombre es obligatorio.",
-                "plan": {"id": plan_id, "name_plan": name, "clases_mensuales": clases, "is_unlimited": ilim},
-                "mode": "edit",
-            })
-
-        plan.update({
-            "name_plan": name,
-            "clases_mensuales": clases,
-            "is_unlimited": ilim,
-        })
-        return redirect('plans_list')
-
-    return render(request, 'plans_forms.html', {"plan": plan, "mode": "edit"})
+        form = anadirPlan(request.POST, instance=plan)
+        if form.is_valid():
+            form.save()
+            return redirect('plans_list')
+    else:
+        form = anadirPlan(instance=plan)
+    return render(request, 'plans_forms.html', {"form": form, "mode": "edit"})
 
 @staff_member_required
-def plans_delete(request, plan_id: int):
-    if request.method != "POST":
-        raise Http404()
-    remove_by_id(PLANES, plan_id)
+def plans_br(request, plan_id: int):
+    plan = get_object_or_404(Plan, pk=plan_id)
+    if request.method == "POST":
+        plan.delete()
+        return redirect('plans_list')
+    # Si alguien entra por GET, lo mandamos a la lista
     return redirect('plans_list')
-"""
+
+# ------------------ ACTIVIDADES (DEMO EN MEMORIA) ------------------
 @login_required
 def activities_list(request):
     return render(request, 'activities_list.html', {"activities": ACTIVIDADES})
@@ -148,14 +112,14 @@ def activities_register(request):
                 "activity": {"name": name},
                 "mode": "create",
             })
-        ACTIVIDADES.append({"id": next_id("act"), "name": name})
+        ACTIVIDADES.append({"id": get_next_id(ACTIVIDADES), "name": name})
         return redirect('activities_list')
 
-    return render(request, 'activities_forms.html', {"mode": "create"})
+    return render(request, 'activities_form.html', {"mode": "create"})
 
 @staff_member_required
 def activities_edit(request, activity_id: int):
-    act = find_by_id(ACTIVIDADES, activity_id)
+    act = next((a for a in ACTIVIDADES if a["id"] == activity_id), None)
     if not act:
         raise Http404("Actividad no existe")
 
@@ -175,11 +139,14 @@ def activities_edit(request, activity_id: int):
 @staff_member_required
 def activities_delete(request, activity_id: int):
     if request.method != "POST":
-        raise Http404()
-    remove_by_id(ACTIVIDADES, activity_id)
+        return redirect('activities_list')
+    for i, it in enumerate(ACTIVIDADES):
+        if it["id"] == activity_id:
+            del ACTIVIDADES[i]
+            break
     return redirect('activities_list')
 
-
+# ------------------ SESIONES / RESERVAS (DEMO EN MEMORIA) ------------------
 @login_required
 def sessions_list(request):
     amap = actividad_map()
@@ -189,7 +156,6 @@ def sessions_list(request):
 @staff_member_required
 def sessions_register(request):
     return render(request, 'sessions_form.html')
-
 
 @login_required
 def bookings_list(request):
@@ -211,51 +177,3 @@ def bookings_list(request):
 @login_required
 def panel(request):
     return render(request, 'STKAA/panel.html')
-
-
-# Mapas auxiliares (se recalculan cuando hace falta)
-def actividad_map():
-    return {a["id"]: a["name"] for a in ACTIVIDADES}
-
-def user_name_map():
-    return {u["id"]: u["name"] for u in USUARIOS}
-
-def session_map():
-    return {s["id"]: s for s in SESSIONS}
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ------------------ HELPERS CRUD ------------------
-"""
-NEXT_IDS = {
-    "plan": max([p["id"] for p in PLANES] or [0]) + 1,
-    "act":  max([a["id"] for a in ACTIVIDADES] or [0]) + 1,
-}"""
-
-def next_id(kind: str) -> int:
-    nid = NEXT_IDS[kind]
-    NEXT_IDS[kind] += 1
-    return nid
-
-def find_by_id(items, id_):
-    for it in items:
-        if it["id"] == id_:
-            return it
-    return None
-
-def remove_by_id(items, id_) -> bool:
-    for i, it in enumerate(items):
-        if it["id"] == id_:
-            del items[i]
-            return True
-    return False
