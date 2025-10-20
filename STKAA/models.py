@@ -1,4 +1,3 @@
-
 # STKAA/models.py
 from django.db import models
 from django.core.validators import RegexValidator
@@ -14,20 +13,28 @@ class Plan(models.Model):
         """
         Reglas:
         - nombre_plan obligatorio (no solo espacios).
-        - Si ilimitado=True  -> clases_Mensuales debe quedar vacío (None).
+        - Si ilimitado=True  -> NO se permiten clases_Mensuales (error).
         - Si ilimitado=False -> clases_Mensuales debe ser un entero positivo.
         """
         # nombre obligatorio
         if not (self.nombre_plan or "").strip():
             raise ValidationError({"nombre_plan": "El nombre del plan es obligatorio."})
 
+        
         if self.ilimitado:
-            # Normalizamos a None para no guardar un número que no aplica
+            # Si es ilimitado y viene un número, es error
+            if self.clases_Mensuales not in (None, 0):
+                raise ValidationError({
+                    "clases_Mensuales": "No ingrese cantidad de clases si el plan es ilimitado."
+                })
+            
             self.clases_Mensuales = None
         else:
             # Debe existir y ser > 0
             if self.clases_Mensuales is None or self.clases_Mensuales <= 0:
-                raise ValidationError({"clases_Mensuales": "Debe ingresar un número positivo."})
+                raise ValidationError({
+                    "clases_Mensuales": "Debe ingresar un número positivo."
+                })
 
     def __str__(self):
         return self.nombre_plan
@@ -56,3 +63,25 @@ class Actividad(models.Model):
 
     def __str__(self):
         return self.nombre
+    
+
+class Clase(models.Model):
+    # SIN FK: guardamos el nombre de la actividad en texto
+    actividad = models.CharField(max_length=60)
+
+    inicio = models.DateTimeField()
+    termino = models.DateTimeField()
+
+    ESTADOS = (
+        ("terminada", "terminada"),
+        ("cancelada", "cancelada"),
+        ("programada", "programada"),
+    )
+    estado = models.CharField(max_length=20, choices=ESTADOS, default="programada")
+
+    def clean(self):
+        if self.termino and self.inicio and self.termino <= self.inicio:
+            raise ValidationError({"termino": "La hora de término debe ser posterior al inicio."})
+
+    def __str__(self):
+        return f"{self.actividad} — {self.inicio:%Y-%m-%d %H:%M}"

@@ -1,42 +1,81 @@
-{% extends "base.html"%}
-{% block title %}Nueva Clase (sesión){% endblock %}
+{% extends "base.html" %}
+{% block title %}{% if mode == "edit" %}Editar clase{% else %}Nueva clase{% endif %}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-12 col-md-10 col-lg-8">
     <div class="card shadow-sm">
       <div class="card-body">
-        <h2 class="h4 mb-4">Nueva clase</h2>
+        <h2 class="h4 mb-4">{% if mode == "edit" %}Editar clase{% else %}Nueva clase{% endif %}</h2>
 
-        <form  action="" autocomplete="off">
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <form method="post" action="" autocomplete="off" class="row g-3">
           {% csrf_token %}
 
-          <div class="mb-3">
-            <label for="activity_id" class="form-label"><strong>ID de actividad</strong></label>
-            <input type="number" class="form-control" id="activity_id" name="activity_id" min="1" placeholder="Ej: 1 simulacion de select con informacion de las actividades" required>
-            <div class="form-text">Ingresa el ID de una actividad existente.</div>
+          <!-- Actividad como SELECT (con fallback al widget del form) -->
+          <div class="col-12">
+            <label class="form-label"><strong>Actividad</strong></label>
+
+            {% if actividades_options %}
+              <select name="actividad" class="form-select" required>
+                <option value="" disabled
+                  {% if not form.is_bound and not form.instance.actividad %}
+                    selected
+                  {% elif form.is_bound and not form.data.actividad %}
+                    selected
+                  {% endif %}
+                >Selecciona una actividad</option>
+
+                {% for opt in actividades_options %}
+                  <option value="{{ opt }}"
+                    {% if form.is_bound %}
+                      {% if form.data.actividad == opt %}selected{% endif %}
+                    {% else %}
+                      {% if form.instance.actividad == opt %}selected{% endif %}
+                    {% endif %}
+                  >{{ opt|capfirst }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              {{ form.actividad }}
+            {% endif %}
+
+            {% if form.actividad.errors %}
+              <div class="text-danger small mt-1">{{ form.actividad.errors|striptags }}</div>
+            {% endif %}
           </div>
 
-          <div class="mb-3">
-            <label for="start_class" class="form-label"><strong>Inicio (start_class)</strong></label>
-            <input type="datetime-local" class="form-control" id="start_class" name="start_class" required>
+          <div class="col-12 col-md-6">
+            <label class="form-label"><strong>Inicio</strong></label>
+            {{ form.inicio }}
+            {% if form.inicio.errors %}
+              <div class="text-danger small mt-1">{{ form.inicio.errors|striptags }}</div>
+            {% endif %}
           </div>
 
-          <div class="mb-3">
-            <label for="end_class" class="form-label"><strong>Término (end_class)</strong></label>
-            <input type="datetime-local" class="form-control" id="end_class" name="end_class" required>
+          <div class="col-12 col-md-6">
+            <label class="form-label"><strong>Término</strong></label>
+            {{ form.termino }}
+            {% if form.termino.errors %}
+              <div class="text-danger small mt-1">{{ form.termino.errors|striptags }}</div>
+            {% endif %}
           </div>
 
-          <div class="mb-3">
-            <label for="status" class="form-label"><strong>Estado</strong></label>
-            <select name="status" id="status" class="form-select">
-              <option value="terminada">terminada</option>
-              <option value="cancelada">cancelada</option>
-            </select>
+          <div class="col-12 col-md-6">
+            <label class="form-label"><strong>Estado</strong></label>
+            {{ form.estado }}
+            {% if form.estado.errors %}
+              <div class="text-danger small mt-1">{{ form.estado.errors|striptags }}</div>
+            {% endif %}
           </div>
 
-          <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary" disabled>Guardar</button>
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              {% if mode == "edit" %}Guardar cambios{% else %}Guardar{% endif %}
+            </button>
             <a href="{% url 'sessions_list' %}" class="btn btn-outline-secondary">Cancelar</a>
           </div>
         </form>

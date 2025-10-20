@@ -2,20 +2,17 @@ from django.urls import path
 from .views import (
     index,
     user_list, user_register,
-    #plans_list, plans_register, plans_edit, plans_delete,
     activities_list, activities_register, activities_edit, activities_delete,
-    sessions_list, sessions_register, bookings_list, 
+    sessions_list, sessions_register, sessions_edit, sessions_delete,  # ← añadidos
+    bookings_list,
 )
-from STKAA.views import cr_plan,planes_list,plans_br,plans_editar
+from STKAA.views import cr_plan, planes_list, plans_br, plans_editar
 
 urlpatterns = [
     path('', index, name='index'),
 
-
-
     path('user/', user_list, name='user_list'),
     path('user/new/', user_register, name='user_register'),
-
 
     path('plans/', planes_list, name='plans_list'),
     path('plans/new/', cr_plan, name='cr_plan'),
@@ -29,5 +26,8 @@ urlpatterns = [
 
     path('sessions/', sessions_list, name='sessions_list'),
     path('sessions/new/', sessions_register, name='sessions_register'),
+    path('sessions/<int:session_id>/edit/', sessions_edit, name='sessions_edit'),       # ← nuevo
+    path('sessions/<int:session_id>/delete/', sessions_delete, name='sessions_delete'), # ← nuevo
+
     path('bookings/', bookings_list, name='bookings_list'),
 ]

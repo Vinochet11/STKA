@@ -1,28 +1,19 @@
 # STKAA/views.py
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
-from .models import Actividad
+# Modelos
+from STKAA.models import Plan, Actividad, Clase
 
-# --- MODELOS / FORMS ---
-from STKAA.models import Plan
-from STKAA.forms import anadirPlan
+# Forms
+from STKAA.forms import anadirPlan, ActividadForm, ClaseForm
 
-from .models import Actividad
-from STKAA.forms import ActividadForm
 
-# ------------------ DATOS EN MEMORIA (DEMO) ------------------
+# ------------------ DATOS DEMO (SOLO PARA USUARIOS/BOOKINGS) ------------------
 USUARIOS = [
     {"id": 1, "name": "Jose",   "Plan_mensual": 1, "email": "test@test.cl",  "rol": "Admin", "status": "Activo"},
     {"id": 2, "name": "Javier", "Plan_mensual": 2, "email": "test@mail.com", "rol": "user",  "status": "Inactivo"},
-]
-
-SESSIONS = [
-    {"id": 1, "activity_id": 1, "start_class": "10/09/2025 21:00", "end_class": "10/09/2025 22:00", "status": "terminada"},
-    {"id": 2, "activity_id": 2, "start_class": "10/09/2025 11:00", "end_class": "10/09/2025 12:00", "status": "terminada"},
-    {"id": 3, "activity_id": 3, "start_class": "11/09/2025 16:00", "end_class": "11/09/2025 17:00", "status": "cancelada"},
 ]
 
 BOOKING = [
@@ -30,39 +21,69 @@ BOOKING = [
     {"id": 2, "user_id": 1, "session_id": 2, "status": "asistire"},
 ]
 
-ACTIVIDADES = [
-    {"id": 1, "name": "boxeo"},
-    {"id": 2, "name": "kickboxing"},
-    {"id": 3, "name": "gimnasia funcional"},
-]
 
 # ------------------ HELPERS ------------------
-def get_next_id(items) -> int:
-    return (max([it["id"] for it in items], default=0) + 1)
-
-def actividad_map():
-    return {a["id"]: a["name"] for a in ACTIVIDADES}
-
 def user_name_map():
     return {u["id"]: u["name"] for u in USUARIOS}
 
-def session_map():
-    return {s["id"]: s for s in SESSIONS}
+def session_map_from_db():
+    """
+    Mapa de Clases (BD) por id para enriquecer las reservas demo.
+    """
+    out = {}
+    for c in Clase.objects.all():
+        out[c.id] = {
+            "id": c.id,
+            "activity_name": c.actividad,  # compat con vistas antiguas
+            "start_class": c.inicio,
+            "end_class": c.termino,
+            "status": c.estado,
+        }
+    return out
 
-# ------------------ VISTAS BASE ------------------
+
+# ------------------ HOME / DASHBOARD ------------------
 def index(request):
-    return render(request, 'index.html')
+    # KPIs desde la BD
+    kpi_planes = Plan.objects.count()
+    kpi_actividades = Actividad.objects.count()
+    kpi_clases = Clase.objects.count()
 
+    # Próximas clases desde la BD (mapeadas a las claves usadas por tu template)
+    sesiones = [
+        {
+            "activity_name": c.actividad,
+            "start_class": c.inicio,
+            "end_class": c.termino,
+            "status": c.estado,
+        }
+        for c in Clase.objects.order_by("inicio")[:5]
+    ]
+
+    # Algunas actividades reales (BD)
+    actividades = Actividad.objects.order_by("id")[:8]
+
+    context = {
+        "kpi_planes": kpi_planes,
+        "kpi_actividades": kpi_actividades,
+        "kpi_clases": kpi_clases,
+        "sesiones": sesiones,        # el template index.html usa: activity_name, start_class, end_class, status
+        "actividades": actividades,  # el template muestra a.nombre
+    }
+    return render(request, "index.html", context)
+
+
+# ------------------ USUARIOS (DEMO) ------------------
 @staff_member_required
 def user_list(request):
-    # Nota: ya no se enriquece con PLANES (lista en memoria) para evitar inconsistencias.
     return render(request, 'user_list.html', {"users": USUARIOS})
 
 @staff_member_required
 def user_register(request):
     return render(request, 'user_form.html')
 
-# ------------------ PLANES (DB) ------------------
+
+# ------------------ PLANES (BD) ------------------
 @staff_member_required
 def cr_plan(request):
     if request.method == "POST":
@@ -70,13 +91,11 @@ def cr_plan(request):
         if form.is_valid():
             form.save()
             return redirect("plans_list")
-        # Si no es válido, re-render con errores
         return render(request, "plans_forms.html", {"form": form, "mode": "create"})
     else:
         form = anadirPlan()
     return render(request, "plans_forms.html", {"form": form, "mode": "create"})
 
-# Quita @login_required si quieres que cualquiera lo vea
 def planes_list(request):
     planes = Plan.objects.all().order_by("id")
     return render(request, "plans_list.html", {"plans": planes})
@@ -99,11 +118,10 @@ def plans_br(request, plan_id: int):
     if request.method == "POST":
         plan.delete()
         return redirect('plans_list')
-    # Si alguien entra por GET, lo mandamos a la lista
     return redirect('plans_list')
 
-# --- Activities ---
-#@login_required
+
+# ------------------ ACTIVIDADES (BD) ------------------
 def activities_list(request):
     acts = Actividad.objects.order_by("id")
     return render(request, "activities_list.html", {"activities": acts})
@@ -140,33 +158,63 @@ def activities_delete(request, activity_id):
     return redirect("activities_list")
 
 
+# ------------------ CLASES (BD, sin FK) ------------------
 
 
 
-
-
-
-
-
-
-
-
-# ------------------ SESIONES / RESERVAS (DEMO EN MEMORIA) ------------------
-#@login_required
 def sessions_list(request):
-    amap = actividad_map()
-    sessions_enriched = [{**s, "activity_name": amap.get(s["activity_id"], "—")} for s in SESSIONS]
-    return render(request, 'sessions_list.html', {"sessions": sessions_enriched, "activity_map": amap})
+    clases = Clase.objects.order_by("inicio")
+    return render(request, "sessions_list.html", {"sessions": clases})
+
+def _actividad_options():
+    nombres = list(Actividad.objects.order_by("nombre").values_list("nombre", flat=True))
+    return nombres if nombres else ["boxeo", "kickboxing", "gimnasia funcional"]
 
 @staff_member_required
 def sessions_register(request):
-    return render(request, 'sessions_form.html')
+    if request.method == "POST":
+        form = ClaseForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("sessions_list")
+    else:
+        form = ClaseForm()
+    return render(
+        request,
+        "sessions_form.html",
+        {"form": form, "mode": "create", "actividades_options": _actividad_options()},
+    )
 
+@staff_member_required
+def sessions_edit(request, session_id: int):
+    clase = get_object_or_404(Clase, pk=session_id)
+    if request.method == "POST":
+        form = ClaseForm(request.POST, instance=clase)
+        if form.is_valid():
+            form.save()
+            return redirect("sessions_list")
+    else:
+        form = ClaseForm(instance=clase)
+    return render(
+        request,
+        "sessions_form.html",
+        {"form": form, "mode": "edit", "actividades_options": _actividad_options()},
+    )
+
+@staff_member_required
+def sessions_delete(request, session_id: int):
+    clase = get_object_or_404(Clase, pk=session_id)
+    if request.method == "POST":
+        clase.delete()
+        return redirect("sessions_list")
+    return redirect("sessions_list")
+
+
+# ------------------ BOOKINGS (DEMO, ENRIQUECIDAS DESDE BD) ------------------
 @login_required
 def bookings_list(request):
     uname = user_name_map()
-    smap  = session_map()
-    amap  = actividad_map()
+    smap  = session_map_from_db()  # ahora desde BD
 
     bookings_enriched = []
     for b in BOOKING:
@@ -174,38 +222,13 @@ def bookings_list(request):
         bookings_enriched.append({
             **b,
             "user_name":     uname.get(b.get("user_id"), "—"),
-            "activity_name": amap.get(session["activity_id"]) if session else "—",
-            "start_class":   session["start_class"] if session else "—",
+            "activity_name": session["activity_name"] if session else "—",
+            "start_class":   session["start_class"]   if session else "—",
         })
     return render(request, 'bookings_list.html', {"bookings": bookings_enriched})
 
+
+# ------------------ PANEL ------------------
 @login_required
 def panel(request):
     return render(request, 'STKAA/panel.html')
-
-
-
-def index(request):
-    # KPIs sencillos
-    kpi_planes = Plan.objects.count()
-    kpi_actividades = len(ACTIVIDADES)
-    kpi_clases = len(SESSIONS)
-
-    # “Próximas” clases demo (las primeras 5 de tu lista)
-    amap = actividad_map()   # ya definida en tu views.py
-    sesiones = [
-        {
-            **s,
-            "activity_name": amap.get(s["activity_id"], "—")
-        }
-        for s in SESSIONS[:5]
-    ]
-
-    context = {
-        "kpi_planes": kpi_planes,
-        "kpi_actividades": kpi_actividades,
-        "kpi_clases": kpi_clases,
-        "sesiones": sesiones,
-        "actividades": ACTIVIDADES[:8],  # muestra algunas
-    }
-    return render(request, "index.html", context)
