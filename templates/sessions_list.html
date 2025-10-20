@@ -3,7 +3,7 @@
 
 {% block content %}
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="h4 mb-0">Clases (sesiones)</h2>
+    <h2 class="h4 mb-0">Clases</h2>
 
     {% if request.user.is_staff %}
       <a href="{% url 'sessions_register' %}" class="btn btn-primary btn-sm">
