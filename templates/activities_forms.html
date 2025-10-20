@@ -1,26 +1,52 @@
 {% extends "base.html" %}
-{% block title %}{% if mode == "edit" %}Editar Actividad{% else %}Nueva Actividad{% endif %}{% endblock %}
+{% block title %}{% if mode == "edit" %}Editar actividad{% else %}Nueva actividad{% endif %}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <h2 class="mb-3">{% if mode == "edit" %}Editar Actividad{% else %}Nueva Actividad{% endif %}</h2>
+<div class="row justify-content-center">
+  <div class="col-12 col-md-10 col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h4 mb-4">{% if mode == "edit" %}Editar actividad{% else %}Nueva actividad{% endif %}</h2>
 
-  {% if error %}
-    <div class="alert alert-danger">{{ error }}</div>
-  {% endif %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+        {% if error %}
+          <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
 
-  <form method="post" action="">
-    {% csrf_token %}
+        <form method="post" action="" autocomplete="off" class="row g-3">
+          {% csrf_token %}
 
-    <div class="mb-3">
-      <label for="name" class="form-label"><strong>Nombre</strong></label>
-      <input id="name" name="name" type="text" class="form-control" value="{{ activity.name|default:'' }}" required>
+          <div class="col-12">
+            <label class="form-label"><strong>Nombre de la actividad</strong></label>
+            {{ form.nombre }}
+            {% if form.nombre.errors %}
+              <div class="text-danger small mt-1">{{ form.nombre.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          {# Si tu formulario incluye el campo 'profesor', se mostrará aquí #}
+          {% if form.profesor %}
+            <div class="col-12">
+              <label class="form-label"><strong>Profesor a cargo</strong></label>
+              {{ form.profesor }}
+              {% if form.profesor.errors %}
+                <div class="text-danger small mt-1">{{ form.profesor.errors|striptags }}</div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              {% if mode == "edit" %}Guardar cambios{% else %}Guardar{% endif %}
+            </button>
+            <a href="{% url 'activities_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+          </div>
+        </form>
+
+      </div>
     </div>
-
-    <button type="submit" class="btn btn-primary">
-      {% if mode == "edit" %}Guardar cambios{% else %}Guardar{% endif %}
-    </button>
-    <a href="{% url 'activities_list' %}" class="btn btn-outline-secondary ms-2">Volver</a>
-  </form>
+  </div>
 </div>
 {% endblock %}

@@ -1,5 +1,120 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %}Inicio{% endblock %}
+
 {% block content %}
-  <h2>Bienvenido</h2>
+
+
+<div class="p-4 p-md-5 mb-4 bg-white border rounded-3 shadow-sm">
+  <div class="row align-items-center">
+    <div class="col-md-8">
+      <h1 class="display-6 fw-bold mb-2">¡Bienvenido a STKAA!</h1>
+      <p class="text-muted mb-3">
+        Gestiona tus planes, actividades y clases deportivas desde un solo lugar.
+      </p>
+
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'plans_list' %}" class="btn btn-primary">Ver planes</a>
+        <a href="{% url 'activities_list' %}" class="btn btn-outline-primary">Ver actividades</a>
+        <a href="{% url 'sessions_list' %}" class="btn btn-outline-secondary">Ver clases</a>
+
+        {% if request.user.is_staff %}
+          <a href="{% url 'cr_plan' %}" class="btn btn-success">+ Nuevo plan</a>
+          <a href="{% url 'activities_register' %}" class="btn btn-success">+ Nueva actividad</a>
+          <a href="{% url 'sessions_register' %}" class="btn btn-success">+ Nueva clase</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-4 mt-4 mt-md-0">
+      <div class="row g-3">
+        <div class="col-4 col-md-12">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <div class="fs-4 fw-bold">{{ kpi_planes }}</div>
+              <div class="text-muted small">Planes</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-4 col-md-12">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <div class="fs-4 fw-bold">{{ kpi_actividades }}</div>
+              <div class="text-muted small">Actividades</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-4 col-md-12">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <div class="fs-4 fw-bold">{{ kpi_clases }}</div>
+              <div class="text-muted small">Clases</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>    
+  </div>
+</div>
+
+<!-- contenido prinicpal -->
+<div class="row g-4">
+  
+  <div class="col-12 col-lg-7">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 m-0">Próximas clases</h2>
+          <a href="{% url 'sessions_list' %}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+        </div>
+
+        {% if sesiones %}
+          <div class="list-group list-group-flush">
+            {% for s in sesiones %}
+              <div class="list-group-item d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-semibold">{{ s.activity_name }}</div>
+                  <div class="small text-muted">
+                    Inicio: {{ s.start_class }} · Término: {{ s.end_class }}
+                  </div>
+                </div>
+                <span class="badge {% if s.status == 'terminada' %}text-bg-success{% elif s.status == 'cancelada' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">
+                  {{ s.status }}
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-muted">No hay clases próximas.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- actividades -->
+  <div class="col-12 col-lg-5">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 m-0">Actividades</h2>
+          <a href="{% url 'activities_list' %}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+        </div>
+
+        {% if actividades %}
+          <div class="row row-cols-2 g-3">
+            {% for a in actividades %}
+              <div class="col">
+                <div class="border rounded p-3 h-100 d-flex align-items-center">
+                  <span class="fw-semibold text-capitalize">{{ a.name }}</span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-muted">No hay actividades registradas.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

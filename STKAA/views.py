@@ -4,9 +4,14 @@ from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
-# --- MODELOS / FORMS (planos, sin subcarpetas) ---
+from .models import Actividad
+
+# --- MODELOS / FORMS ---
 from STKAA.models import Plan
 from STKAA.forms import anadirPlan
+
+from .models import Actividad
+from STKAA.forms import ActividadForm
 
 # ------------------ DATOS EN MEMORIA (DEMO) ------------------
 USUARIOS = [
@@ -97,57 +102,57 @@ def plans_br(request, plan_id: int):
     # Si alguien entra por GET, lo mandamos a la lista
     return redirect('plans_list')
 
-# ------------------ ACTIVIDADES (DEMO EN MEMORIA) ------------------
-@login_required
+# --- Activities ---
+#@login_required
 def activities_list(request):
-    return render(request, 'activities_list.html', {"activities": ACTIVIDADES})
+    acts = Actividad.objects.order_by("id")
+    return render(request, "activities_list.html", {"activities": acts})
 
 @staff_member_required
 def activities_register(request):
     if request.method == "POST":
-        name = (request.POST.get("name") or "").strip()
-        if not name:
-            return render(request, 'activities_form.html', {
-                "error": "El nombre es obligatorio.",
-                "activity": {"name": name},
-                "mode": "create",
-            })
-        ACTIVIDADES.append({"id": get_next_id(ACTIVIDADES), "name": name})
-        return redirect('activities_list')
-
-    return render(request, 'activities_form.html', {"mode": "create"})
+        form = ActividadForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("activities_list")
+    else:
+        form = ActividadForm()
+    return render(request, "activities_forms.html", {"form": form, "mode": "create"})
 
 @staff_member_required
-def activities_edit(request, activity_id: int):
-    act = next((a for a in ACTIVIDADES if a["id"] == activity_id), None)
-    if not act:
-        raise Http404("Actividad no existe")
-
+def activities_edit(request, activity_id):
+    act = get_object_or_404(Actividad, pk=activity_id)
     if request.method == "POST":
-        name = (request.POST.get("name") or "").strip()
-        if not name:
-            return render(request, 'activities_form.html', {
-                "error": "El nombre es obligatorio.",
-                "activity": {"id": activity_id, "name": name},
-                "mode": "edit",
-            })
-        act.update({"name": name})
-        return redirect('activities_list')
-
-    return render(request, 'activities_form.html', {"activity": act, "mode": "edit"})
+        form = ActividadForm(request.POST, instance=act)
+        if form.is_valid():
+            form.save()
+            return redirect("activities_list")
+    else:
+        form = ActividadForm(instance=act)
+    return render(request, "activities_forms.html", {"form": form, "mode": "edit"})
 
 @staff_member_required
-def activities_delete(request, activity_id: int):
-    if request.method != "POST":
-        return redirect('activities_list')
-    for i, it in enumerate(ACTIVIDADES):
-        if it["id"] == activity_id:
-            del ACTIVIDADES[i]
-            break
-    return redirect('activities_list')
+def activities_delete(request, activity_id):
+    act = get_object_or_404(Actividad, pk=activity_id)
+    if request.method == "POST":
+        act.delete()
+        return redirect("activities_list")
+    return redirect("activities_list")
+
+
+
+
+
+
+
+
+
+
+
+
 
 # ------------------ SESIONES / RESERVAS (DEMO EN MEMORIA) ------------------
-@login_required
+#@login_required
 def sessions_list(request):
     amap = actividad_map()
     sessions_enriched = [{**s, "activity_name": amap.get(s["activity_id"], "—")} for s in SESSIONS]
@@ -177,3 +182,30 @@ def bookings_list(request):
 @login_required
 def panel(request):
     return render(request, 'STKAA/panel.html')
+
+
+
+def index(request):
+    # KPIs sencillos
+    kpi_planes = Plan.objects.count()
+    kpi_actividades = len(ACTIVIDADES)
+    kpi_clases = len(SESSIONS)
+
+    # “Próximas” clases demo (las primeras 5 de tu lista)
+    amap = actividad_map()   # ya definida en tu views.py
+    sesiones = [
+        {
+            **s,
+            "activity_name": amap.get(s["activity_id"], "—")
+        }
+        for s in SESSIONS[:5]
+    ]
+
+    context = {
+        "kpi_planes": kpi_planes,
+        "kpi_actividades": kpi_actividades,
+        "kpi_clases": kpi_clases,
+        "sesiones": sesiones,
+        "actividades": ACTIVIDADES[:8],  # muestra algunas
+    }
+    return render(request, "index.html", context)

@@ -1,43 +1,60 @@
 {% extends "base.html" %}
-{% block title %}{% if mode == "edit" %}Editar plan{% else %}Registrar plan{% endif %}{% endblock %}
+{% block title %}{% if mode == "edit" %}Editar plan{% else %}Nuevo plan{% endif %}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <h2 class="mb-3">{% if mode == "edit" %}Editar plan{% else %}Registrar plan{% endif %}</h2>
+<div class="row justify-content-center">
+  <div class="col-12 col-md-10 col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h4 mb-4">{% if mode == "edit" %}Editar plan{% else %}Nuevo plan{% endif %}</h2>
 
-  {% if form.errors %}
-    <div class="alert alert-danger">
-      Revisa los campos: {{ form.errors }}
-    </div>
-  {% endif %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+        {% if error %}
+          <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
 
-  <form method="post" action="" class="row g-3">
-    {% csrf_token %}
+        <form method="post" action="" autocomplete="off" class="row g-3">
+          {% csrf_token %}
 
-    <div class="col-12 col-md-6">
-      <label class="form-label"><strong>Nombre del plan</strong></label>
-      {{ form.nombre_plan }}
-    </div>
+          <div class="col-12">
+            <label class="form-label"><strong>Nombre del plan</strong></label>
+            {{ form.nombre_plan }}
+            {% if form.nombre_plan.errors %}
+              <div class="text-danger small mt-1">{{ form.nombre_plan.errors|striptags }}</div>
+            {% endif %}
+          </div>
 
-    <div class="col-12 col-md-4">
-      <label class="form-label"><strong>Clases mensuales</strong></label>
-      {{ form.clases_Mensuales }}
-      <div class="form-text"></div>
-    </div>
+          <div class="col-12">
+            <label class="form-label"><strong>Clases mensuales</strong></label>
+            {{ form.clases_Mensuales }}
+            <div class="form-text">Deja vacío si el plan es ilimitado.</div>
+            {% if form.clases_Mensuales.errors %}
+              <div class="text-danger small mt-1">{{ form.clases_Mensuales.errors|striptags }}</div>
+            {% endif %}
+          </div>
 
-    <div class="col-12 col-md-2 d-flex align-items-end">
-      <div>
-        <label class="form-label d-block"><strong>Ilimitado</strong></label>
-        {{ form.ilimitado }}
+          <div class="col-12">
+            <div class="form-check">
+              {{ form.ilimitado }}
+              <label class="form-check-label ms-1"><strong>Ilimitado</strong></label>
+              {% if form.ilimitado.errors %}
+                <div class="text-danger small mt-1">{{ form.ilimitado.errors|striptags }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              {% if mode == "edit" %}Guardar cambios{% else %}Guardar{% endif %}
+            </button>
+            <a href="{% url 'plans_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+          </div>
+        </form>
+
       </div>
     </div>
-
-    <div class="col-12">
-      <button type="submit" class="btn btn-primary">
-        {% if mode == "edit" %}Guardar cambios{% else %}Crear plan{% endif %}
-      </button>
-      <a href="{% url 'plans_list' %}" class="btn btn-outline-secondary ms-2">Cancelar</a>
-    </div>
-  </form>
+  </div>
 </div>
 {% endblock %}

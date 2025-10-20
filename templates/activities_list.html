@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Actividades{% endblock %}
+
 {% block content %}
 <div class="container py-4">
 
@@ -16,6 +17,7 @@
         <tr>
           <th>ID</th>
           <th>Nombre</th>
+          <th>Profesor</th>
           {% if request.user.is_staff %}<th class="text-end">Acciones</th>{% endif %}
         </tr>
       </thead>
@@ -23,7 +25,8 @@
         {% for a in activities %}
           <tr>
             <td>{{ a.id }}</td>
-            <td>{{ a.name }}</td>
+            <td>{{ a.nombre }}</td>
+            <td>{{ a.profesor|default:"—" }}</td>
             {% if request.user.is_staff %}
               <td class="text-end">
                 <a href="{% url 'activities_edit' a.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
@@ -36,7 +39,7 @@
           </tr>
         {% empty %}
           <tr>
-            <td colspan="3" class="text-center text-muted">Sin registros.</td>
+            <td colspan="4" class="text-center text-muted">Sin registros.</td>
           </tr>
         {% endfor %}
       </tbody>
