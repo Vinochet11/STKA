@@ -19,6 +19,7 @@
           <th>Inicio</th>
           <th>Término</th>
           <th>Estado</th>
+          <th>Profesor</th>
           {% if request.user.is_staff %}<th class="text-end">Acciones</th>{% endif %}
         </tr>
       </thead>
@@ -37,6 +38,7 @@
                 {{ s.estado }}
               </span>
             </td>
+            <th>{{s.actividad.profesor |default:"—"  }}</th>
             {% if request.user.is_staff %}
               <td class="text-end">
                 <a href="{% url 'sessions_edit' s.id %}" class="btn btn-sm btn-outline-primary">Editar</a>

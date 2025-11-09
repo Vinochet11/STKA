@@ -15,38 +15,21 @@
         <form method="post" action="" autocomplete="off" class="row g-3">
           {% csrf_token %}
 
-          <!-- Actividad como SELECT (con fallback al widget del form) -->
-          <div class="col-12">
+          <div class="col-12 col-md-6">
             <label class="form-label"><strong>Actividad</strong></label>
-
-            {% if actividades_options %}
-              <select name="actividad" class="form-select" required>
-                <option value="" disabled
-                  {% if not form.is_bound and not form.instance.actividad %}
-                    selected
-                  {% elif form.is_bound and not form.data.actividad %}
-                    selected
-                  {% endif %}
-                >Selecciona una actividad</option>
-
-                {% for opt in actividades_options %}
-                  <option value="{{ opt }}"
-                    {% if form.is_bound %}
-                      {% if form.data.actividad == opt %}selected{% endif %}
-                    {% else %}
-                      {% if form.instance.actividad == opt %}selected{% endif %}
-                    {% endif %}
-                  >{{ opt|capfirst }}</option>
-                {% endfor %}
-              </select>
-            {% else %}
-              {{ form.actividad }}
-            {% endif %}
-
+            {{ form.actividad }}
             {% if form.actividad.errors %}
               <div class="text-danger small mt-1">{{ form.actividad.errors|striptags }}</div>
             {% endif %}
           </div>
+            <!-- 
+          <div class="col-12 col-md-6">
+            <label class="form-label"><strong>Profesor</strong></label>
+            {{ form.profesor }}
+            {% if form.profesor.errors %}
+              <div class="text-danger small mt-1">{{ form.profesor.errors|striptags }}</div>
+            {% endif %}
+          </div>-->
 
           <div class="col-12 col-md-6">
             <label class="form-label"><strong>Inicio</strong></label>

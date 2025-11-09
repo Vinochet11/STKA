@@ -55,7 +55,7 @@ class Actividad(models.Model):
         max_length=60,
         null=True,
         blank=True,
-        help_text="Nombre del profesor responsable de la actividad."
+        help_text="Nombre del profesor a cargo de la actividad."
     )
 
     class Meta:
@@ -66,9 +66,9 @@ class Actividad(models.Model):
     
 
 class Clase(models.Model):
-    # SIN FK: guardamos el nombre de la actividad en texto
-    actividad = models.CharField(max_length=60)
-
+    
+    actividad = models.ForeignKey(Actividad,on_delete=models.PROTECT,related_name="clases",db_column="actividad_id")#el on_delete es para que no se elimine alguna actividad si esque hay clases asociadas
+   
     inicio = models.DateTimeField()
     termino = models.DateTimeField()
 

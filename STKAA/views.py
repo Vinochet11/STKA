@@ -49,7 +49,7 @@ def index(request):
     kpi_actividades = Actividad.objects.count()
     kpi_clases = Clase.objects.count()
 
-    # Próximas clases desde la BD (mapeadas a las claves usadas por tu template)
+    
     sesiones = [
         {
             "activity_name": c.actividad,
@@ -163,12 +163,13 @@ def activities_delete(request, activity_id):
 
 
 def sessions_list(request):
-    clases = Clase.objects.order_by("inicio")
+    clases=Clase.objects.select_related("actividad").order_by("inicio")
+    #clases = Clase.objects.order_by("inicio")
     return render(request, "sessions_list.html", {"sessions": clases})
 
 def _actividad_options():
     nombres = list(Actividad.objects.order_by("nombre").values_list("nombre", flat=True))
-    return nombres if nombres else ["boxeo", "kickboxing", "gimnasia funcional"]
+   
 
 @staff_member_required
 def sessions_register(request):
@@ -182,7 +183,7 @@ def sessions_register(request):
     return render(
         request,
         "sessions_form.html",
-        {"form": form, "mode": "create", "actividades_options": _actividad_options()},
+        {"form": form, "mode": "create"},
     )
 
 @staff_member_required
@@ -198,7 +199,7 @@ def sessions_edit(request, session_id: int):
     return render(
         request,
         "sessions_form.html",
-        {"form": form, "mode": "edit", "actividades_options": _actividad_options()},
+        {"form": form, "mode": "edit"},
     )
 
 @staff_member_required
@@ -210,7 +211,7 @@ def sessions_delete(request, session_id: int):
     return redirect("sessions_list")
 
 
-# ------------------ BOOKINGS (DEMO, ENRIQUECIDAS DESDE BD) ------------------
+# ------------------ BOOKINGS  ------------------
 @login_required
 def bookings_list(request):
     uname = user_name_map()

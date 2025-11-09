@@ -34,16 +34,10 @@ class ClaseForm(forms.ModelForm):
         model = Clase
         fields = ("actividad", "inicio", "termino", "estado")
         widgets = {
-            "actividad": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: Boxeo"}),
+            "actividad": forms.Select(attrs={"class": "form-select"}),
             "inicio": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
             "termino": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
             "estado": forms.Select(attrs={"class": "form-select"}),
-        }
-        error_messages = {
-            "actividad": {
-                "required": "El nombre de la actividad es obligatorio.",
-                "max_length": "Máximo 60 caracteres.",
-            },
         }
 
     def clean(self):

@@ -1,0 +1,1 @@
+[{"model": "STKAA.clase", "pk": 2, "fields": {"actividad": "test", "inicio": "2000-04-04T09:00:00Z", "termino": "2000-04-05T10:00:00Z", "estado": "programada"}}]
