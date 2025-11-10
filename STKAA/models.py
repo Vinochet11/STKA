@@ -85,3 +85,17 @@ class Clase(models.Model):
 
     def __str__(self):
         return f"{self.actividad} — {self.inicio:%Y-%m-%d %H:%M}"
+    
+class Usuario(models.Model):
+    ROL_CHOICES    = (("user","user"), ("admin","admin"))
+    STATUS_CHOICES = (("Activo","Activo"), ("Inactivo","Inactivo"))
+
+    name     = models.CharField(max_length=45)
+    email    = models.EmailField(max_length=100, unique=True,blank=True,null=True)
+    password = models.CharField(max_length=128,blank=True,null=True)  # (simple para la tarea)
+    rol      = models.CharField(max_length=10, choices=ROL_CHOICES, default="user")
+    status   = models.CharField(max_length=10, choices=STATUS_CHOICES, default="Activo")
+    plan     = models.ForeignKey(Plan, null=True, blank=True, on_delete=models.SET_NULL, related_name="usuarios")
+
+    def __str__(self):
+        return self.name

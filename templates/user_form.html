@@ -5,47 +5,51 @@
 
   <div class="card shadow-sm">
     <div class="card-body">
-      <form method="post" action="#" class="row g-3">
+      <form method="post" action="" class="row g-3" autocomplete="off">
         {% csrf_token %}
 
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
         <div class="col-md-6">
-          <label class="form-label">Nombre</label>
-          <input type="text" name="name" maxlength="45" class="form-control" required>
+          <label class="form-label"><strong>{{ form.name.label }}</strong></label>
+          {{ form.name }}
+          {{ form.name.errors }}
         </div>
 
         <div class="col-md-6">
-          <label class="form-label">Email</label>
-          <input type="email" name="email" maxlength="45" class="form-control" required>
+          <label class="form-label"><strong>{{ form.email.label }}</strong></label>
+          {{ form.email }}
+          {{ form.email.errors }}
         </div>
 
         <div class="col-md-6">
-          <label class="form-label">Contraseña</label>
-          <input type="password" name="password" maxlength="45" class="form-control" required>
+          <label class="form-label"><strong>{{ form.password.label }}</strong></label>
+          {{ form.password }}
+          {{ form.password.errors }}
         </div>
 
         <div class="col-md-3">
-          <label class="form-label">Rol</label>
-          <select name="rol" class="form-select">
-            <option value="user">user</option>
-            <option value="admin">admin</option>
-          </select>
+          <label class="form-label"><strong>{{ form.rol.label }}</strong></label>
+          {{ form.rol }}
+          {{ form.rol.errors }}
         </div>
 
         <div class="col-md-3">
-          <label class="form-label">Status</label>
-          <select name="status" class="form-select">
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
+          <label class="form-label"><strong>{{ form.status.label }}</strong></label>
+          {{ form.status }}
+          {{ form.status.errors }}
         </div>
 
-        <div class="col-md-4">
-          <label class="form-label">Plan mensual (id)</label>
-          <input type="number" name="plan_mensual" min="1" step="1" class="form-control">
+        <div class="col-md-6">
+          <label class="form-label"><strong>{{ form.plan.label }}</strong></label>
+          {{ form.plan }}
+          {{ form.plan.errors }}
         </div>
 
         <div class="col-12 d-flex gap-2">
-          <button type="submit" class="btn btn-primary" disabled>Guardar </button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
           <a href="{% url 'user_list' %}" class="btn btn-outline-secondary">Volver</a>
         </div>
       </form>

@@ -2,7 +2,7 @@
 #el template y el views correspondiente.
 
 from django import forms
-from STKAA.models import Plan,Actividad, Clase
+from STKAA.models import Plan,Actividad, Clase,Usuario
 
 class anadirPlan(forms.ModelForm):
     class Meta:
@@ -47,3 +47,30 @@ class ClaseForm(forms.ModelForm):
         if inicio and termino and termino <= inicio:
             self.add_error("termino", "La hora de término debe ser posterior al inicio.")
         return cleaned
+    
+class UsuarioForm(forms.ModelForm):
+    # Forzamos ModelChoiceField para controlar etiqueta/vacío y evitar queryset en import-time
+    plan = forms.ModelChoiceField(
+        label="Plan mensual",
+        queryset=Plan.objects.none(),      # se completará en __init__
+        required=False,                    # permite registrar sin plan
+        empty_label="— Selecciona un plan —",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
+    class Meta:
+        model  = Usuario
+        fields = ("name", "email", "password", "rol", "status", "plan")
+        widgets = {
+            "name":     forms.TextInput(attrs={"class": "form-control"}),
+            "email":    forms.EmailInput(attrs={"class": "form-control"}),
+            "password": forms.PasswordInput(attrs={"class": "form-control"}),
+            "rol":      forms.Select(attrs={"class": "form-select"}),
+            "status":   forms.Select(attrs={"class": "form-select"}),
+            
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        self.fields["plan"].queryset = Plan.objects.order_by("nombre_plan")

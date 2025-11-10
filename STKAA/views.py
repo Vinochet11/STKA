@@ -4,10 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
 # Modelos
-from STKAA.models import Plan, Actividad, Clase
+from STKAA.models import Plan, Actividad, Clase,Usuario
 
 # Forms
-from STKAA.forms import anadirPlan, ActividadForm, ClaseForm
+from STKAA.forms import anadirPlan, ActividadForm, ClaseForm,UsuarioForm
 
 
 # ------------------ DATOS DEMO (SOLO PARA USUARIOS/BOOKINGS) ------------------
@@ -34,7 +34,7 @@ def session_map_from_db():
     for c in Clase.objects.all():
         out[c.id] = {
             "id": c.id,
-            "activity_name": c.actividad,  # compat con vistas antiguas
+            "activity_name": c.actividad,
             "start_class": c.inicio,
             "end_class": c.termino,
             "status": c.estado,
@@ -60,7 +60,7 @@ def index(request):
         for c in Clase.objects.order_by("inicio")[:5]
     ]
 
-    # Algunas actividades reales (BD)
+    
     actividades = Actividad.objects.order_by("id")[:8]
 
     context = {
@@ -73,14 +73,24 @@ def index(request):
     return render(request, "index.html", context)
 
 
-# ------------------ USUARIOS (DEMO) ------------------
+# ------------------ USUARIOS  ------------------
 @staff_member_required
 def user_list(request):
-    return render(request, 'user_list.html', {"users": USUARIOS})
+    users=Usuario.objects.select_related("plan").all().order_by("id")
+    return render(request,'user_list.html',{"users":users})
 
 @staff_member_required
 def user_register(request):
-    return render(request, 'user_form.html')
+    if request.method == "POST":
+        form = UsuarioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("user_list")
+        # <-- DEBUG: imprime errores en consola
+        print("UsuarioForm errors:", form.errors.as_json())
+    else:
+        form = UsuarioForm()
+    return render(request, "user_form.html", {"form": form})
 
 
 # ------------------ PLANES (BD) ------------------
