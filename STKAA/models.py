@@ -92,10 +92,35 @@ class Usuario(models.Model):
 
     name     = models.CharField(max_length=45)
     email    = models.EmailField(max_length=100, unique=True,blank=True,null=True)
-    password = models.CharField(max_length=128,blank=True,null=True)  # (simple para la tarea)
+    password = models.CharField(max_length=128,blank=True,null=True) 
     rol      = models.CharField(max_length=10, choices=ROL_CHOICES, default="user")
     status   = models.CharField(max_length=10, choices=STATUS_CHOICES, default="Activo")
     plan     = models.ForeignKey(Plan, null=True, blank=True, on_delete=models.SET_NULL, related_name="usuarios")
 
     def __str__(self):
         return self.name
+    
+class booking(models.Model):
+    Estados = (
+        ("asistire", "Asistiré"),
+        ("cancelada", "Cancelada")
+    )
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name="bookings",
+    )
+    clase = models.ForeignKey(
+        Clase,
+        on_delete=models.CASCADE,
+        related_name="bookings",
+    )
+    estado = models.CharField(
+        max_length=20,
+        choices=Estados,
+        default="asistire",
+    )
+    creado = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.usuario} -> {self.clase} ({self.estado})"

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if mode == "edit" %}Editar{% else %}Nueva{% endif %} reserva
+{% endblock %}
+
+{% block content %}
+  <h2 class="h4 mb-3">
+    {% if mode == "edit" %}Editar{% else %}Nueva{% endif %} reserva
+  </h2>
+
+  <form method="post">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+      <label class="form-label">Usuario</label>
+      {{ form.usuario }}
+      {% if form.usuario.errors %}
+        <div class="text-danger small">
+          {{ form.usuario.errors }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Clase</label>
+      {{ form.clase }}
+      {% if form.clase.errors %}
+        <div class="text-danger small">
+          {{ form.clase.errors }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Estado de la reserva</label>
+      {{ form.estado }}
+      {% if form.estado.errors %}
+        <div class="text-danger small">
+          {{ form.estado.errors }}
+        </div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      {% if mode == "edit" %}Guardar cambios{% else %}Crear reserva{% endif %}
+    </button>
+
+    <a href="{% url 'bookings_list' %}" class="btn btn-secondary ms-2">
+      Volver
+    </a>
+  </form>
+{% endblock %}

@@ -1,13 +1,9 @@
-# STKAA/views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-
-# Modelos
-from STKAA.models import Plan, Actividad, Clase,Usuario
-
-# Forms
-from STKAA.forms import anadirPlan, ActividadForm, ClaseForm,UsuarioForm
+from STKAA.models import Plan, Actividad, Clase,Usuario,booking
+from STKAA.forms import anadirPlan, ActividadForm, ClaseForm,UsuarioForm,BookingForm
 
 
 # ------------------ DATOS DEMO (SOLO PARA USUARIOS/BOOKINGS) ------------------
@@ -221,23 +217,58 @@ def sessions_delete(request, session_id: int):
     return redirect("sessions_list")
 
 
-# ------------------ BOOKINGS  ------------------
+# ------------------ BOOKING  ------------------
+# @login_required
+# def bookings_list(request):
+#     uname = user_name_map()
+#     smap  = session_map_from_db()  
+
+#     bookings_enriched = []
+#     for b in BOOKING:
+#         session = smap.get(b.get("session_id"))
+#         bookings_enriched.append({
+#             **b,
+#             "user_name":     uname.get(b.get("user_id"), "—"),
+#             "activity_name": session["activity_name"] if session else "—",
+#             "start_class":   session["start_class"]   if session else "—",
+#         })
+#     return render(request, 'bookings_list.html', {"bookings": bookings_enriched})
+
 @login_required
 def bookings_list(request):
-    uname = user_name_map()
-    smap  = session_map_from_db()  # ahora desde BD
+    bookings=(
+        booking.objects
+            .select_related("usuario","clase","clase__actividad")
+            .order_by("clase__inicio")
+    )
+    return render(request,"bookings_list.html",{"bookings":bookings})
 
-    bookings_enriched = []
-    for b in BOOKING:
-        session = smap.get(b.get("session_id"))
-        bookings_enriched.append({
-            **b,
-            "user_name":     uname.get(b.get("user_id"), "—"),
-            "activity_name": session["activity_name"] if session else "—",
-            "start_class":   session["start_class"]   if session else "—",
-        })
-    return render(request, 'bookings_list.html', {"bookings": bookings_enriched})
+@staff_member_required
+def booking_register(request):
+    if request.method=="POST":
+        form = BookingForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("bookings_list")
+    else:
+        form=BookingForm()
+    return render(request,"bookings_form.html",{"form":form,"mode":"create"})
 
+@staff_member_required
+def booking_edit(request,booking_id:int):
+    booking=get_object_or_404(booking,pk=booking_id)
+    if request.method=="POST":
+        form=BookingForm(request.POST,instance=booking)
+        if form.is_valid():
+            form.save()
+            return redirect("bookings_list")
+@staff_member_required
+def booking_delete(request,booking_id:int):
+    booking=get_object_or_404(booking,pk=booking_id)
+    if request.method=="POST":
+        booking.delete()
+        return redirect("bookings_list")
+    return redirect("bookings_list")
 
 # ------------------ PANEL ------------------
 @login_required

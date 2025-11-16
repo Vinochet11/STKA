@@ -2,7 +2,7 @@
 #el template y el views correspondiente.
 
 from django import forms
-from STKAA.models import Plan,Actividad, Clase,Usuario
+from STKAA.models import Plan,Actividad, Clase,Usuario,booking
 
 class anadirPlan(forms.ModelForm):
     class Meta:
@@ -49,11 +49,11 @@ class ClaseForm(forms.ModelForm):
         return cleaned
     
 class UsuarioForm(forms.ModelForm):
-    # Forzamos ModelChoiceField para controlar etiqueta/vacío y evitar queryset en import-time
+    
     plan = forms.ModelChoiceField(
         label="Plan mensual",
-        queryset=Plan.objects.none(),      # se completará en __init__
-        required=False,                    # permite registrar sin plan
+        queryset=Plan.objects.none(),      
+        required=False,                   
         empty_label="— Selecciona un plan —",
         widget=forms.Select(attrs={"class": "form-select"}),
     )
@@ -74,3 +74,19 @@ class UsuarioForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         self.fields["plan"].queryset = Plan.objects.order_by("nombre_plan")
+
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model=booking
+        fields=("usuario","clase","estado")
+        widgets={
+            "usuario":forms.Select(attrs={"class":"form-select"}),
+            "clase":forms.Select(attrs={"class":"form-select"}),
+            "estado":forms.Select(attrs={"class":"form-select"})
+        }
+    
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.fields["usuario"].queryset=Usuario.objects.order_by("name")
+        self.fields["clase"].queryset=Clase.objects.select_related("actividad").order_by("inicio")
