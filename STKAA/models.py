@@ -33,7 +33,7 @@ class Actividad(models.Model):
     
 
 class Clase(models.Model):
-    s
+    
     actividad = models.ForeignKey(
         Actividad,
         on_delete=models.PROTECT,# el protect prohibe borrar una actividad si tiene una clase asociada 
