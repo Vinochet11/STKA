@@ -20,7 +20,7 @@ class Actividad(models.Model):
     profesor = models.CharField(
         max_length=60,
         null=True,
-        unique=True,   # lo dejo como tú lo tenías ahora
+        unique=True,   
         blank=True,
         help_text="Nombre del profesor a cargo de la actividad."
     )
@@ -33,10 +33,10 @@ class Actividad(models.Model):
     
 
 class Clase(models.Model):
-    # NO se puede borrar una Actividad si tiene Clases asociadas
+    s
     actividad = models.ForeignKey(
         Actividad,
-        on_delete=models.PROTECT,
+        on_delete=models.PROTECT,# el protect prohibe borrar una actividad si tiene una clase asociada 
         related_name="clases",
         db_column="actividad_id",
     )
@@ -68,12 +68,12 @@ class Usuario(models.Model):
     rol      = models.CharField(max_length=10, choices=ROL_CHOICES, default="user")
     status   = models.CharField(max_length=10, choices=STATUS_CHOICES, default="Activo")
 
-    # Igual que antes: si se borra el Plan, el usuario queda sin plan
+    
     plan     = models.ForeignKey(
         Plan,
         null=True,
         blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.SET_NULL,# si se borra el plan el usuario queda sin plan
         related_name="usuarios",
     )
 
@@ -87,17 +87,17 @@ class booking(models.Model):
         ("cancelada", "Cancelada")
     )
 
-    # Igual que antes: si se borra el usuario, se borran sus reservas
+   
     usuario = models.ForeignKey(
         Usuario,
-        on_delete=models.CASCADE,
+        on_delete=models.CASCADE,#por el cascada, si se borra el usuario, se borran sus agendamientos
         related_name="bookings",
     )
 
-    # Igual que antes: si se borra la clase, se borran sus bookings
+    
     clase = models.ForeignKey(
         Clase,
-        on_delete=models.CASCADE,
+        on_delete=models.CASCADE,# si se borra la clase se borran todos los agendamientos relacionados
         related_name="bookings",
     )
 

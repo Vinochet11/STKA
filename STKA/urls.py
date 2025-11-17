@@ -18,8 +18,7 @@ from django.contrib import admin
 from django.urls import path,include
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    
+   
     path('accounts/',include('django.contrib.auth.urls')), #esta crea la view accounts/login/ & /accounts/logout/ automaticamente 
 
     path('',include('STKAA.urls'))
