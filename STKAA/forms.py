@@ -1,6 +1,3 @@
-##crear una carpeta ej:Planes, por cada uno. dentro de esta for a meter el formulario ej: formPlanes, 
-#el template y el views correspondiente.
-
 from django import forms
 from STKAA.models import Plan,Actividad, Clase,Usuario,booking
 from django.core.exceptions import ValidationError
@@ -99,12 +96,9 @@ class BookingForm(forms.ModelForm):
 
         if usuario and clase:
             qs = booking.objects.filter(usuario=usuario, clase=clase)
-            # Si estoy editando, excluyo la misma reserva
             if self.instance.pk:
                 qs = qs.exclude(pk=self.instance.pk)
-
             if qs.exists():
-                # En vez de raise ValidationError general, lo pegamos al campo usuario
                 self.add_error(
                     "usuario",
                     "Este usuario ya tiene una reserva para esta clase."

@@ -20,7 +20,6 @@
           <th>Término</th>
           <th>Estado</th>
           <th>Profesor</th>
-
           {% if request.user.is_staff %}<th>Alumnos</th>{% endif %}
           {% if request.user.is_staff %}<th class="text-end">Acciones</th>{% endif %}
         </tr>
@@ -30,8 +29,8 @@
           <tr>
             <td>{{ s.id }}</td>
             <td class="text-capitalize">{{ s.actividad }}</td>
-            <td>{{ s.inicio|date:"Y-m-d H:i" }}</td>
-            <td>{{ s.termino|date:"Y-m-d H:i" }}</td>
+            <td>{{ s.inicio|date:"d-m-Y H:i" }}</td>
+            <td>{{ s.termino|date:"d-m-Y H:i" }}</td>
             <td>
               <span class="badge
                 {% if s.estado == 'terminada' %}text-bg-success
