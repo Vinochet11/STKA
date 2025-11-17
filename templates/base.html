@@ -27,30 +27,15 @@
           <li class="nav-item"><a class="nav-link" href="{% url 'plans_list' %}">Planes</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'activities_list' %}">Actividades</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'sessions_list' %}">Clases</a></li>
-
-          {% if request.user.is_authenticated and not request.user.is_staff %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'bookings_list' %}">Mis agendamientos</a></li>
+          {% if request.user.is_authenticated  %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'bookings_list'  %}">agendamientos</a></li>
           {% endif %}
-
           {% if request.user.is_staff %}
-            <!-- Menú de administración agrupado -->
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Administración
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="navAdmin">
-                <li><a class="dropdown-item" href="{% url 'user_list' %}">Usuarios</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{% url 'user_register' %}">Nuevo usuario</a></li>
-                <li><a class="dropdown-item" href="{% url 'cr_plan' %}">Nuevo plan</a></li>
-                <li><a class="dropdown-item" href="{% url 'activities_register' %}">Nueva actividad</a></li>
-                <li><a class="dropdown-item" href="{% url 'sessions_register' %}">Nueva clase</a></li>
-              </ul>
-            </li>
+            <li class="nav-item" ><a class="nav-link" href="{% url 'user_list'  %}">usuarios</a></li>
           {% endif %}
         </ul>
 
-        <!-- usuario / sesión -->
+         <!-- nombre y botones principales del lado derecho -->
         <div class="d-flex align-items-center gap-3">
           {% if request.user.is_authenticated %}
             <span class="text-white-50">Hola, <strong>{{ request.user.username }}</strong></span>

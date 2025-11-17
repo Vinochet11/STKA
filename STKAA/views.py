@@ -1,26 +1,11 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import logout,login,authenticate
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from STKAA.models import Plan, Actividad, Clase,Usuario,booking
+from STKAA.models import Plan, Actividad, Clase,Usuario,booking as Booking
 from STKAA.forms import anadirPlan, ActividadForm, ClaseForm,UsuarioForm,BookingForm
-
-
-# ------------------ DATOS DEMO (SOLO PARA USUARIOS/BOOKINGS) ------------------
-USUARIOS = [
-    {"id": 1, "name": "Jose",   "Plan_mensual": 1, "email": "test@test.cl",  "rol": "Admin", "status": "Activo"},
-    {"id": 2, "name": "Javier", "Plan_mensual": 2, "email": "test@mail.com", "rol": "user",  "status": "Inactivo"},
-]
-
-BOOKING = [
-    {"id": 1, "user_id": 2, "session_id": 1, "status": "cancelada"},
-    {"id": 2, "user_id": 1, "session_id": 2, "status": "asistire"},
-]
-
-
-# ------------------ HELPERS ------------------
-def user_name_map():
-    return {u["id"]: u["name"] for u in USUARIOS}
 
 def session_map_from_db():
     """
@@ -38,9 +23,9 @@ def session_map_from_db():
     return out
 
 
-# ------------------ HOME / DASHBOARD ------------------
+
 def index(request):
-    # KPIs desde la BD
+    
     kpi_planes = Plan.objects.count()
     kpi_actividades = Actividad.objects.count()
     kpi_clases = Clase.objects.count()
@@ -63,13 +48,39 @@ def index(request):
         "kpi_planes": kpi_planes,
         "kpi_actividades": kpi_actividades,
         "kpi_clases": kpi_clases,
-        "sesiones": sesiones,        # el template index.html usa: activity_name, start_class, end_class, status
-        "actividades": actividades,  # el template muestra a.nombre
+        "sesiones": sesiones,        
+        "actividades": actividades,  
     }
     return render(request, "index.html", context)
 
+def login_view(request):
+    
+    if request.user.is_authenticated:
+        return redirect("index")
 
-# ------------------ USUARIOS  ------------------
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()          
+            login(request, user)           
+
+           
+            next_url = request.GET.get("next") or "index"
+            return redirect(next_url)
+    else:
+        form = AuthenticationForm(request)
+
+    return render(request, "login.html", {"form": form})
+
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect("login")
+
+
+
+
 @staff_member_required
 def user_list(request):
     users=Usuario.objects.select_related("plan").all().order_by("id")
@@ -82,14 +93,13 @@ def user_register(request):
         if form.is_valid():
             form.save()
             return redirect("user_list")
-        # <-- DEBUG: imprime errores en consola
         print("UsuarioForm errors:", form.errors.as_json())
     else:
         form = UsuarioForm()
     return render(request, "user_form.html", {"form": form})
 
 
-# ------------------ PLANES (BD) ------------------
+
 @staff_member_required
 def cr_plan(request):
     if request.method == "POST":
@@ -127,7 +137,6 @@ def plans_br(request, plan_id: int):
     return redirect('plans_list')
 
 
-# ------------------ ACTIVIDADES (BD) ------------------
 def activities_list(request):
     acts = Actividad.objects.order_by("id")
     return render(request, "activities_list.html", {"activities": acts})
@@ -164,19 +173,29 @@ def activities_delete(request, activity_id):
     return redirect("activities_list")
 
 
-# ------------------ CLASES (BD, sin FK) ------------------
 
 
 
 def sessions_list(request):
     clases=Clase.objects.select_related("actividad").order_by("inicio")
-    #clases = Clase.objects.order_by("inicio")
     return render(request, "sessions_list.html", {"sessions": clases})
 
 def _actividad_options():
     nombres = list(Actividad.objects.order_by("nombre").values_list("nombre", flat=True))
    
+@staff_member_required
+def session_estudiante(request, session_id):
+    clase = get_object_or_404(Clase, pk=session_id)  
+    bookings = clase.bookings.select_related("usuario").all()
 
+    return render(
+        request,
+        "sessions_estudiante.html",
+        {
+            "clase": clase,
+            "bookings": bookings,
+        },
+    )
 @staff_member_required
 def sessions_register(request):
     if request.method == "POST":
@@ -217,27 +236,10 @@ def sessions_delete(request, session_id: int):
     return redirect("sessions_list")
 
 
-# ------------------ BOOKING  ------------------
-# @login_required
-# def bookings_list(request):
-#     uname = user_name_map()
-#     smap  = session_map_from_db()  
-
-#     bookings_enriched = []
-#     for b in BOOKING:
-#         session = smap.get(b.get("session_id"))
-#         bookings_enriched.append({
-#             **b,
-#             "user_name":     uname.get(b.get("user_id"), "—"),
-#             "activity_name": session["activity_name"] if session else "—",
-#             "start_class":   session["start_class"]   if session else "—",
-#         })
-#     return render(request, 'bookings_list.html', {"bookings": bookings_enriched})
-
 @login_required
 def bookings_list(request):
     bookings=(
-        booking.objects
+        Booking.objects
             .select_related("usuario","clase","clase__actividad")
             .order_by("clase__inicio")
     )
@@ -255,22 +257,25 @@ def booking_register(request):
     return render(request,"bookings_form.html",{"form":form,"mode":"create"})
 
 @staff_member_required
-def booking_edit(request,booking_id:int):
-    booking=get_object_or_404(booking,pk=booking_id)
-    if request.method=="POST":
-        form=BookingForm(request.POST,instance=booking)
+def booking_edit(request, booking_id:int):
+    obj = get_object_or_404(Booking, pk=booking_id)
+    if request.method == "POST":
+        form = BookingForm(request.POST, instance=obj)
         if form.is_valid():
             form.save()
             return redirect("bookings_list")
+    else:
+        form = BookingForm(instance=obj)
+    return render(request, "bookings_form.html", {"form": form, "mode": "edit"})
+
 @staff_member_required
 def booking_delete(request,booking_id:int):
-    booking=get_object_or_404(booking,pk=booking_id)
+    obj=get_object_or_404(Booking,pk=booking_id)
     if request.method=="POST":
-        booking.delete()
-        return redirect("bookings_list")
+        obj.delete()
     return redirect("bookings_list")
 
-# ------------------ PANEL ------------------
+
 @login_required
 def panel(request):
     return render(request, 'STKAA/panel.html')

@@ -3,6 +3,7 @@
 
 from django import forms
 from STKAA.models import Plan,Actividad, Clase,Usuario,booking
+from django.core.exceptions import ValidationError
 
 class anadirPlan(forms.ModelForm):
     class Meta:
@@ -78,15 +79,35 @@ class UsuarioForm(forms.ModelForm):
 
 class BookingForm(forms.ModelForm):
     class Meta:
-        model=booking
-        fields=("usuario","clase","estado")
-        widgets={
-            "usuario":forms.Select(attrs={"class":"form-select"}),
-            "clase":forms.Select(attrs={"class":"form-select"}),
-            "estado":forms.Select(attrs={"class":"form-select"})
+        model  = booking
+        fields = ("usuario","clase","estado")
+        widgets = {
+            "usuario": forms.Select(attrs={"class":"form-select"}),
+            "clase":   forms.Select(attrs={"class":"form-select"}),
+            "estado":  forms.Select(attrs={"class":"form-select"}),
         }
     
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
-        self.fields["usuario"].queryset=Usuario.objects.order_by("name")
-        self.fields["clase"].queryset=Clase.objects.select_related("actividad").order_by("inicio")
+        self.fields["usuario"].queryset = Usuario.objects.order_by("name")
+        self.fields["clase"].queryset   = Clase.objects.select_related("actividad").order_by("inicio")
+
+    def clean(self):
+        cleaned = super().clean()
+        usuario = cleaned.get("usuario")
+        clase   = cleaned.get("clase")
+
+        if usuario and clase:
+            qs = booking.objects.filter(usuario=usuario, clase=clase)
+            # Si estoy editando, excluyo la misma reserva
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+
+            if qs.exists():
+                # En vez de raise ValidationError general, lo pegamos al campo usuario
+                self.add_error(
+                    "usuario",
+                    "Este usuario ya tiene una reserva para esta clase."
+                )
+
+        return cleaned

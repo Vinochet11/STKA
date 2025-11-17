@@ -20,6 +20,8 @@
           <th>Término</th>
           <th>Estado</th>
           <th>Profesor</th>
+
+          {% if request.user.is_staff %}<th>Alumnos</th>{% endif %}
           {% if request.user.is_staff %}<th class="text-end">Acciones</th>{% endif %}
         </tr>
       </thead>
@@ -38,20 +40,32 @@
                 {{ s.estado }}
               </span>
             </td>
-            <th>{{s.actividad.profesor |default:"—"  }}</th>
+            <td>{{ s.actividad.profesor|default:"—" }}</td>
+
+            {% if request.user.is_staff %}
+             <td>
+               {{ s.bookings.count }} alumnos 
+               {% if s.bookings.count %}
+                 (<a href="{% url 'session_estudiante' s.id %}">ver</a>)
+               {% endif %}
+             </td>
+            {% endif %}
             {% if request.user.is_staff %}
               <td class="text-end">
                 <a href="{% url 'sessions_edit' s.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
+
                 <form method="post" action="{% url 'sessions_delete' s.id %}" style="display:inline">
                   {% csrf_token %}
-                  <button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar clase?')">Eliminar</button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar clase?')">
+                    Eliminar
+                  </button>
                 </form>
               </td>
             {% endif %}
           </tr>
         {% empty %}
           <tr>
-            <td colspan="6" class="text-center text-muted">Sin registros.</td>
+            <td colspan="7" class="text-center text-muted">Sin registros.</td>
           </tr>
         {% endfor %}
       </tbody>

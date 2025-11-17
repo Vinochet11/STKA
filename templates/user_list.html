@@ -4,6 +4,9 @@
 {% block content %}
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="h4 mb-0">Usuarios</h2>
+    {% if request.user.is_staff %}
+      <a class="btn btn-primary" href="{% url  'user_register'  %}"> + Registrar Usuario</a>
+    {% endif %}
    
   </div>
 

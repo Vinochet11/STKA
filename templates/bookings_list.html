@@ -3,9 +3,11 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h2 class="h4 mb-0">Reservas</h2>
-  <a href="{% url 'booking_register' %}" class="btn btn-primary btn-sm">
-    Nueva reserva
+  {% if request.user.is_staff %}
+  <h2>agendamientos</h2>
+  <a href="{% url 'booking_register' %}" class="btn btn-primary btn-sm">+ Nueva reserva</a>
+
+  {% endif %}
   </a>
 </div>
 

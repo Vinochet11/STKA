@@ -16,13 +16,13 @@ class Plan(models.Model):
         - Si ilimitado=True  -> NO se permiten clases_Mensuales (error).
         - Si ilimitado=False -> clases_Mensuales debe ser un entero positivo.
         """
-        # nombre obligatorio
+        
         if not (self.nombre_plan or "").strip():
             raise ValidationError({"nombre_plan": "El nombre del plan es obligatorio."})
 
         
         if self.ilimitado:
-            # Si es ilimitado y viene un número, es error
+            
             if self.clases_Mensuales not in (None, 0):
                 raise ValidationError({
                     "clases_Mensuales": "No ingrese cantidad de clases si el plan es ilimitado."
@@ -30,7 +30,7 @@ class Plan(models.Model):
             
             self.clases_Mensuales = None
         else:
-            # Debe existir y ser > 0
+            
             if self.clases_Mensuales is None or self.clases_Mensuales <= 0:
                 raise ValidationError({
                     "clases_Mensuales": "Debe ingresar un número positivo."
