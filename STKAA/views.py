@@ -180,7 +180,7 @@ def session_estudiante(request, session_id):
     )
 
 
-@staff_member_required
+@login_required
 def sessions_register(request):
     if request.method == "POST":
         form = ClaseForm(request.POST)
