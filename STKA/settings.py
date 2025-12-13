@@ -84,14 +84,10 @@ WSGI_APPLICATION = 'STKA.wsgi.application'
 pymysql.install_as_MySQLdb()
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mydb',
-        'USER': 'root',
-        'PASSWORD': 'admin',            
-        'HOST': 'localhost',           
-        'PORT': '3306',
-    }
+  "default": {
+    "ENGINE": "django.db.backends.sqlite3",
+    "NAME": BASE_DIR / "db.sqlite3",
+  }
 }
 
 

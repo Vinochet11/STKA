@@ -20,6 +20,7 @@ from django.urls import path,include
 urlpatterns = [
    
     path('accounts/',include('django.contrib.auth.urls')), #esta crea la view accounts/login/ & /accounts/logout/ automaticamente 
+    path('admin/', admin.site.urls),
 
     path('',include('STKAA.urls'))
 

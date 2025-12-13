@@ -2,41 +2,52 @@ from django import forms
 from STKAA.models import Plan,Actividad, Clase,Usuario,booking
 from django.core.exceptions import ValidationError
 
-class anadirPlan(forms.ModelForm):
-    class Meta:
-        model= Plan
-        fields=("nombre_plan","clases_Mensuales","ilimitado")
-        widgets={
-            "nombre_plan":forms.TextInput(attrs={"class":"form-control"}),
-            "clases_mensuales":forms.NumberInput(attrs={"class":"form-control",}),
-            "ilimitado":forms.CheckboxInput(attrs={"class":"form-check-input"}), 
-        }
+from django import forms
 
+# ---------- PLAN ----------
+class PlanForm(forms.Form):
+    nombre_plan = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={"class": "form-control"})
+    )
+    clases_Mensuales = forms.IntegerField(
+        required=False,
+        min_value=0,
+        widget=forms.NumberInput(attrs={"class": "form-control"})
+    )
+    ilimitado = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
+    )
 
+# ---------- ACTIVIDAD ----------
+class ActividadForm(forms.Form):
+    nombre = forms.CharField(
+        max_length=60,
+        widget=forms.TextInput(attrs={"class":"form-control","placeholder":"Ej: Boxeo, Karate"})
+    )
+    profesor = forms.CharField(
+        max_length=60,
+        required=False,
+        widget=forms.TextInput(attrs={"class":"form-control"})
+    )
 
-class ActividadForm(forms.ModelForm):
-    class Meta:
-        model = Actividad 
-        fields= ("nombre","profesor")
-        widgets={
-            "nombre":forms.TextInput(attrs={"class":"form-control","placeholder":"Ej:Boxeo,karate"}),
-            "profesor":forms.TextInput(attrs={"class":"form-control",}),
-        }       
-        error_messages={
-             "nombre":{"required":"El nombre de la actividad es obligarotio.","max_length":"Maximo 50 caracteres."},
-             "profesor":{"required":"El nombre del profesor es obligatorio ","max_length":"Maximo 50 caracteres"},
-            }
-        
-class ClaseForm(forms.ModelForm):
-    class Meta:
-        model = Clase
-        fields = ("actividad", "inicio", "termino", "estado")
-        widgets = {
-            "actividad": forms.Select(attrs={"class": "form-select"}),
-            "inicio": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
-            "termino": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
-            "estado": forms.Select(attrs={"class": "form-select"}),
-        }
+# ---------- CLASE ----------
+class ClaseForm(forms.Form):
+    # OJO: actividad es FK en tu API actual, por eso mandaremos actividad_id (int)
+    actividad = forms.IntegerField(
+        widget=forms.NumberInput(attrs={"class":"form-control", "placeholder":"ID Actividad"})
+    )
+    inicio = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={"type":"datetime-local","class":"form-control"})
+    )
+    termino = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={"type":"datetime-local","class":"form-control"})
+    )
+    estado = forms.ChoiceField(
+        choices=[("terminada","terminada"),("cancelada","cancelada"),("programada","programada")],
+        widget=forms.Select(attrs={"class":"form-select"})
+    )
 
     def clean(self):
         cleaned = super().clean()
@@ -45,63 +56,21 @@ class ClaseForm(forms.ModelForm):
         if inicio and termino and termino <= inicio:
             self.add_error("termino", "La hora de término debe ser posterior al inicio.")
         return cleaned
-    
-class UsuarioForm(forms.ModelForm):
-    
-    plan = forms.ModelChoiceField(
-        label="Plan mensual",
-        queryset=Plan.objects.none(),      
-        required=False,                   
-        empty_label="— Selecciona un plan —",
-        widget=forms.Select(attrs={"class": "form-select"}),
+
+# ---------- USUARIO ----------
+class UsuarioForm(forms.Form):
+    name = forms.CharField(max_length=45, widget=forms.TextInput(attrs={"class":"form-control"}))
+    email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={"class":"form-control"}))
+    password = forms.CharField(required=False, widget=forms.PasswordInput(attrs={"class":"form-control"}))
+    rol = forms.ChoiceField(choices=[("user","user"),("admin","admin")], widget=forms.Select(attrs={"class":"form-select"}))
+    status = forms.ChoiceField(choices=[("Activo","Activo"),("Inactivo","Inactivo")], widget=forms.Select(attrs={"class":"form-select"}))
+    plan = forms.IntegerField(required=False, widget=forms.NumberInput(attrs={"class":"form-control","placeholder":"ID Plan (opcional)"}))
+
+# ---------- BOOKING ----------
+class BookingForm(forms.Form):
+    usuario = forms.IntegerField(widget=forms.NumberInput(attrs={"class":"form-control","placeholder":"ID Usuario"}))
+    clase = forms.IntegerField(widget=forms.NumberInput(attrs={"class":"form-control","placeholder":"ID Clase"}))
+    estado = forms.ChoiceField(
+        choices=[("asistire","Asistiré"),("cancelada","Cancelada")],
+        widget=forms.Select(attrs={"class":"form-select"})
     )
-
-    class Meta:
-        model  = Usuario
-        fields = ("name", "email", "password", "rol", "status", "plan")
-        widgets = {
-            "name":     forms.TextInput(attrs={"class": "form-control"}),
-            "email":    forms.EmailInput(attrs={"class": "form-control"}),
-            "password": forms.PasswordInput(attrs={"class": "form-control"}),
-            "rol":      forms.Select(attrs={"class": "form-select"}),
-            "status":   forms.Select(attrs={"class": "form-select"}),
-            
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        self.fields["plan"].queryset = Plan.objects.order_by("nombre_plan")
-
-
-class BookingForm(forms.ModelForm):
-    class Meta:
-        model  = booking
-        fields = ("usuario","clase","estado")
-        widgets = {
-            "usuario": forms.Select(attrs={"class":"form-select"}),
-            "clase":   forms.Select(attrs={"class":"form-select"}),
-            "estado":  forms.Select(attrs={"class":"form-select"}),
-        }
-    
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        self.fields["usuario"].queryset = Usuario.objects.order_by("name")
-        self.fields["clase"].queryset   = Clase.objects.select_related("actividad").order_by("inicio")
-
-    def clean(self):
-        cleaned = super().clean()
-        usuario = cleaned.get("usuario")
-        clase   = cleaned.get("clase")
-
-        if usuario and clase:
-            qs = booking.objects.filter(usuario=usuario, clase=clase)
-            if self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
-            if qs.exists():
-                self.add_error(
-                    "usuario",
-                    "Este usuario ya tiene una reserva para esta clase."
-                )
-
-        return cleaned
